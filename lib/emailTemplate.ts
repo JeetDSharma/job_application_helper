@@ -1,4 +1,11 @@
-export function buildEmailTemplate({ name, email, company, position, isAlum }: any) {
+type EmailTemplateParams = {
+  name: string;
+  position: string;
+  company: string;
+};
+
+
+export function buildEmailTemplate({ name, company, position }: EmailTemplateParams) {
   return `
     <div>
       <p>Hi ${name},</p>

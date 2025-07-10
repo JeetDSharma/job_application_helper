@@ -1,4 +1,16 @@
-export function buildAlumTemplate({ name, position, company }: any): string {
+type AlumTemplateParams = {
+  name: string;
+  position: string;
+  company: string;
+  university: string;
+};
+
+export function buildAlumTemplate({
+  name,
+  position,
+  company,
+  university,
+}: AlumTemplateParams): string {
   return `
     <div style="font-family: sans-serif; line-height: 1.5;">
       <p>Hi ${name},</p>
@@ -6,12 +18,12 @@ export function buildAlumTemplate({ name, position, company }: any): string {
       <p>I hope you're doing well.</p>
 
       <p>
-        I noticed that we both attended <strong>University of Massachusetts Amherst</strong>, and I always appreciate connecting with fellow alumni.
+        I noticed that we both attended <strong>${university}</strong>, and I always appreciate connecting with fellow alumni.
         I recently came across the <strong>${position}</strong> position at <strong>${company}</strong> and believe it aligns perfectly with my skills and experience.
       </p>
 
       <p>
-        Given our shared background at UMass Amherst, I was hoping you could share any insights or advice about the role and the team.
+        Given our shared background at ${university}, I was hoping you could share any insights or advice about the role and the team.
         I've attached my resume for your reference and would appreciate it if you could forward it to the hiring team.
       </p>
 
