@@ -32,7 +32,7 @@ export default function Home() {
 
             method: "POST",
             body: JSON.stringify({
-              emailForm
+              ...emailForm
             })
         })
         if (response) {

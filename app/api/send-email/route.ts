@@ -7,13 +7,11 @@ import { buildEmailTemplate } from "@/templates/emailTemplate";
 import { UNIVERSITY_NAME } from "@/lib/constants";
 import { RESUME_NAME } from "@/lib/constants";
 
-type ResponseData = {
-  message : string
-}
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
     const body = await req.json();
     const {email, name, company, job_position, isAlum} = body;
+    console.log(body)
 
     const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -42,7 +40,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
   };
   try {
     await transporter.sendMail(mailOptions);
-    return res.status(200).json({message: "Email Sent Succesfully!"})
+    return NextResponse.json({ message: "Email Sent Successfully!" }, { status: 200 });
+
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
