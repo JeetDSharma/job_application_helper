@@ -7,8 +7,12 @@ import { buildEmailTemplate } from "@/templates/emailTemplate";
 import { UNIVERSITY_NAME } from "@/lib/constants";
 import { RESUME_NAME } from "@/lib/constants";
 
-export async function POST(request: NextRequest) {
-    const body = await request.json();
+type ResponseData = {
+  message : string
+}
+
+export async function POST(req: NextRequest, res: NextResponse) {
+    const body = await req.json();
     const {email, name, company, job_position, isAlum} = body;
 
     const transporter = nodemailer.createTransport({
@@ -38,7 +42,7 @@ export async function POST(request: NextRequest) {
   };
   try {
     await transporter.sendMail(mailOptions);
-    return NextResponse.json({ message: "Email sent!" });
+    return res.status(200).json({message: "Email Sent Succesfully!"})
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
