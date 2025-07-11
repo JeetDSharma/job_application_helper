@@ -10,7 +10,7 @@ datasource db {
 
 model Company {
   id          String      @id @default(uuid())
-  companyName String
+  companyName String      @unique
   createdAt   DateTime    @default(now())
   recipients  Recipient[]
 
@@ -18,16 +18,14 @@ model Company {
 }
 
 model Recipient {
-  id          String     @id @default(uuid())
-  email       String
-  name        String
-  jobPosition String
-  isAlumni    Boolean
-  company     Company    @relation(fields: [companyId], references: [id])
-  companyId   String
-  emailLogs   EmailLog[]
+  id        String     @id @default(uuid())
+  email     String     @unique
+  name      String
+  isAlumni  Boolean
+  company   Company    @relation(fields: [companyId], references: [id])
+  companyId String
+  emailLogs EmailLog[]
 
-  @@unique([email, companyId])
   @@index([email])
 }
 
@@ -37,5 +35,6 @@ model EmailLog {
   recipient    Recipient @relation(fields: [recipientId], references: [id])
   recipientId  String
   status       String    @default("PENDING")
+  jobPosition  String
   errorMessage String?
 }
