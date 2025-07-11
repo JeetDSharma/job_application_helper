@@ -1,10 +1,20 @@
 import { PrismaClient } from "@/app/generated/prisma";
 const prisma = new PrismaClient();
 
-export async function upsertCompany(companyName: string) {
-  return await prisma.company.upsert({
+type UpsertCompanyInput = {
+  companyName: string;
+};
+
+export async function upsertCompany({
+  companyName,
+}: UpsertCompanyInput): Promise<string> {
+  const response = await prisma.company.upsert({
     where: { companyName },
     update: {},
     create: { companyName },
+    select: {
+      id: true,
+    },
   });
+  return response.id;
 }

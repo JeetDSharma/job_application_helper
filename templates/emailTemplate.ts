@@ -1,14 +1,22 @@
-import { LINKEDIN_URL, GITHUB_URL, PORTFOLIO_URL, CONTACT_NUMBER, YOUR_NAME } from "@/lib/constants";
-
+import {
+  LINKEDIN_URL,
+  GITHUB_URL,
+  PORTFOLIO_URL,
+  CONTACT_NUMBER,
+  YOUR_NAME,
+} from "@/lib/constants";
 
 type EmailTemplateParams = {
   name: string;
-  job_position: string;
+  jobPosition: string;
   company: string;
 };
 
-
-export function buildEmailTemplate({ name, job_position, company }: EmailTemplateParams) {
+export function buildEmailTemplate({
+  name,
+  jobPosition,
+  company,
+}: EmailTemplateParams) {
   return `
     <div>
       <p>Hi ${name},</p>
@@ -16,7 +24,7 @@ export function buildEmailTemplate({ name, job_position, company }: EmailTemplat
       <p>I hope you're doing well.</p>
 
       <p>
-        I came across the <strong>${job_position}</strong> position at <strong>${company}</strong> and believe it aligns perfectly with my skills and experience.
+        I came across the <strong>${jobPosition}</strong> position at <strong>${company}</strong> and believe it aligns perfectly with my skills and experience.
         I'm highly interested in applying for this role.
       </p>
 
