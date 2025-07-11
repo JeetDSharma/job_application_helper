@@ -6,6 +6,9 @@ type InsertEmailLog = {
   jobPosition: string;
 };
 
+type UpdateEmailStatus = {
+  emailLogId: string;
+};
 export async function insertEmailLog({
   recipientId,
   jobPosition,
@@ -22,10 +25,10 @@ export async function insertEmailLog({
   return response.id;
 }
 
-export async function updateEmailStatus(emailId: string) {
+export async function updateEmailStatus({ emailLogId }: UpdateEmailStatus) {
   return await prisma.emailLog.update({
     where: {
-      id: emailId,
+      id: emailLogId,
     },
     data: {
       status: "SENT",

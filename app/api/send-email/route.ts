@@ -7,12 +7,27 @@ import { buildEmailTemplate } from "@/templates/emailTemplate";
 import { UNIVERSITY_NAME } from "@/lib/constants";
 import { RESUME_NAME } from "@/lib/constants";
 import { PrismaClient } from "@/app/generated/prisma";
+import { upsertCompany } from "@/lib/db/company";
+import { upsertRecipient } from "@/lib/db/recipient";
+import { insertEmailLog, updateEmailStatus } from "@/lib/db/emailLog";
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { email, name, company, job_position, isAlum } = body;
+  const { email, name, company, jobPosition, isAlum } = body;
   console.log(body);
+
+  const companyId = await upsertCompany({ companyName: company });
+  const recipientId = await upsertRecipient({
+    email,
+    name,
+    companyId,
+    isAlumni: isAlum,
+  });
+  const emailLogId = await insertEmailLog({
+    recipientId,
+    jobPosition,
+  });
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -27,16 +42,16 @@ export async function POST(req: NextRequest) {
   const html_body = isAlum
     ? buildAlumTemplate({
         name,
-        job_position,
+        jobPosition,
         company,
         university: UNIVERSITY_NAME,
       })
-    : buildEmailTemplate({ name, job_position, company });
+    : buildEmailTemplate({ name, jobPosition, company });
 
   const mailOptions = {
     from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
     to: email,
-    subject: `Seeking Your Advice on ${job_position} Position at ${company}`,
+    subject: `Seeking Your Advice on ${jobPosition} Position at ${company}`,
     html: html_body,
     attachments: [
       {
@@ -49,6 +64,7 @@ export async function POST(req: NextRequest) {
   try {
     await transporter.sendMail(mailOptions);
     console.log("Sent");
+    await updateEmailStatus({ emailLogId });
     return NextResponse.json(
       { message: "Email Sent Successfully!" },
       { status: 200 }
