@@ -45,11 +45,6 @@ A full-stack email-sending tool built with **Next.js 15**, featuring dynamic HTM
 
 📄 .env.local # Environment variables
 
-yaml
-Copy
-Edit
-
----
 
 ## 🚀 Getting Started
 
@@ -67,13 +62,11 @@ npm install
 Create a .env.local file at the root:
 
 env
-Copy
-Edit
 SMTP_USER=your_email@gmail.com
 SMTP_PASS=your_app_password
 UNIVERSITY_NAME=Your University Name
 RESUME_NAME=Jeet_Sharma_Resume.pdf
-🔐 You must use a Gmail App Password: Generate one here
+🔐 You must use a Gmail App Password
 
 4. Add Resume
 Place your resume.pdf file inside the public/ folder.
