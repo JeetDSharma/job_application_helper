@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
   };
   try {
     await transporter.sendMail(mailOptions);
+    console.log("Sent")
     return NextResponse.json({ message: "Email Sent Successfully!" }, { status: 200 });
 
   } catch (err) {

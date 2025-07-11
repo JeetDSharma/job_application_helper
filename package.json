@@ -1,5 +1,5 @@
 {
-  "name": "jon-application-helper",
+  "name": "job-application-helper",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,8 @@
     "next": "15.3.5",
     "nodemailer": "^7.0.5",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

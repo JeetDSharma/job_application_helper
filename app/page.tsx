@@ -1,6 +1,7 @@
 "use client"
 import Image from "next/image";
 import React, { useState } from 'react';
+import toast, {Toaster} from 'react-hot-toast';
 
 export default function Home() {
   const [emailForm, setEmailForm] = useState({
@@ -28,6 +29,7 @@ export default function Home() {
         const response = await fetch("/api/send-email", {
           headers: {
             Accept: "application/json",
+            
           },
 
             method: "POST",
@@ -38,9 +40,11 @@ export default function Home() {
         if (response) {
           const data = await response.json()
           if (response.ok) {
-          alert("Email Sent Successfully!");
+          // alert("Email Sent Successfully!");
+          toast.success("Email Sent Successfully!")
           } else { 
-            alert(`Failed to send email: ${data.error || "Unknown error"}`);
+            console.log((`Failed to send email: ${data.error || "Unknown error"}`))
+            toast.error("Failed to Send Email")
           }
         }
         
@@ -53,10 +57,15 @@ export default function Home() {
   }
 
   return (
+    <>
+    
+    <Toaster position="top-center" reverseOrder={false} />
     <div className="min-h-screen flex justify-center items-center bg-gray-100">
       <div className="bg-white p-8 shadow-md rounded-lg w-lg">
         <h1 className="text-2xl font-semibold text-center mb-6">Send Email</h1>
-        <form className="flex flex-col gap-4">
+        <form className="flex flex-col gap-4" onSubmit={(e)=>{
+          e.preventDefault(); handleSubmit();
+        }}>
           <div className="flex flex-col">
 
           <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
@@ -111,9 +120,10 @@ export default function Home() {
                 />
                <label className="text-sm"> Is Alum?</label>
             </div>
-          <button type="submit"  onClick={handleSubmit} className="border border-black rounded-md px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white">Send Email</button>
+          <button type="submit" className="border border-black rounded-md px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white">Send Email</button>
         </form>
       </div>
     </div>
+    </>
   );
 }
