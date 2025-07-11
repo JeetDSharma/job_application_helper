@@ -1,3 +1,6 @@
+import { LINKEDIN_URL, GITHUB_URL, PORTFOLIO_URL, CONTACT_NUMBER, YOUR_NAME } from "@/lib/constants";
+
+
 type EmailTemplateParams = {
   name: string;
   job_position: string;
@@ -26,11 +29,11 @@ export function buildEmailTemplate({ name, job_position, company }: EmailTemplat
 
       <p>
         Best regards,<br/>
-        JEET SHARMA<br/>
-        +1 (413) 466-5844<br/>
-        <a href="https://www.linkedin.com/in/jeet-sharma/" target="_blank">LinkedIn</a> |
-        <a href="https://www.jeetsharma.com/" target="_blank">GitHub</a> |
-        <a href="https://www.jeetsharma.com/" target="_blank">Portfolio</a>
+        ${YOUR_NAME}<br/>
+        ${CONTACT_NUMBER}<br/>
+        <a href="${LINKEDIN_URL}" target="_blank">LinkedIn</a> |
+        <a href="${GITHUB_URL}" target="_blank">GitHub</a> |
+        <a href="${PORTFOLIO_URL}" target="_blank">Portfolio</a>
       </p>
     </div>
   `;
