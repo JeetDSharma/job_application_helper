@@ -6,6 +6,9 @@ import { buildAlumTemplate } from "@/templates/alumTemplate";
 import { buildEmailTemplate } from "@/templates/emailTemplate";
 import { UNIVERSITY_NAME } from "@/lib/constants";
 import { RESUME_NAME } from "@/lib/constants";
+import { PrismaClient } from "@/app/generated/prisma";
+const prisma = new PrismaClient()
+
 
 
 export async function POST(req: NextRequest) {

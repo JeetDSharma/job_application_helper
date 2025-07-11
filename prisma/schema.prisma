@@ -31,8 +31,10 @@ model Recipient {
 }
 
 model EmailLog {
-  id          String    @id @default(uuid())
-  sentAt      DateTime  @default(now())
-  recipient   Recipient @relation(fields: [recipientId], references: [id])
-  recipientId String
+  id           String    @id @default(uuid())
+  sentAt       DateTime  @default(now())
+  recipient    Recipient @relation(fields: [recipientId], references: [id])
+  recipientId  String
+  status       String    @default("PENDING")
+  errorMessage String?
 }
