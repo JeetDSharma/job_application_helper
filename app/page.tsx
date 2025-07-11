@@ -1,6 +1,6 @@
 "use client"
 import Image from "next/image";
-import React, { useState } from 'react';
+import React, { useState, useRef} from 'react';
 import toast, {Toaster} from 'react-hot-toast';
 
 export default function Home() {
@@ -11,6 +11,10 @@ export default function Home() {
     job_position: "",
     isAlum: false
   });
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+;
+  const [isPending, setIsPending] = useState(false);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const { id, value, type, checked } = e.target;
@@ -22,39 +26,60 @@ export default function Home() {
 };
 
 
-  const handleSubmit = async () => {
-    console.log(emailForm)
-    const sendEmail = async() => {
-      try {
-        const response = await fetch("/api/send-email", {
-          headers: {
-            Accept: "application/json",
-            
-          },
+ const handleSubmit = async () => {
+  if (isPending) return; 
+  setIsPending(true);
 
-            method: "POST",
-            body: JSON.stringify({
-              ...emailForm
-            })
-        })
-        if (response) {
-          const data = await response.json()
-          if (response.ok) {
-          // alert("Email Sent Successfully!");
-          toast.success("Email Sent Successfully!")
-          } else { 
-            console.log((`Failed to send email: ${data.error || "Unknown error"}`))
-            toast.error("Failed to Send Email")
+  toast(
+  (t) => (
+    <span>
+      Sending in 10 seconds...
+      <button
+        onClick={() => {
+          if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
           }
-        }
-        
-      } catch (error) {
-        console.error("Send email error:", error);
-        toast.error("Failed to Send Email")
-      }
+          toast.dismiss(t.id);
+          toast("Email sending cancelled.");
+          setIsPending(false);
+        }}
+        className="ml-4 text-red-500 underline"
+      >
+        Cancel
+      </button>
+    </span>
+  ),
+  { duration: 10000 }
+);
+
+
+  timerRef.current = setTimeout(async () => {
+  try {
+    const response = await fetch("/api/send-email", {
+      headers: { Accept: "application/json" },
+      method: "POST",
+      body: JSON.stringify({ ...emailForm }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success("Email Sent Successfully!");
+    } else {
+      console.error(`Failed to send email: ${data.error || "Unknown error"}`);
+      toast.error("Failed to Send Email");
     }
-    sendEmail()
+  } catch (error) {
+    console.error("Send email error:", error);
+    toast.error("Failed to Send Email");
+  } finally {
+    setIsPending(false);
+    timerRef.current = null;
   }
+},10000);
+
+
+};
 
   return (
     <>
