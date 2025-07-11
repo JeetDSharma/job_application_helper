@@ -65,7 +65,7 @@ export default function Home() {
             name = "email"
             id="email"
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 transition"
+            className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500" 
             />
             </div>
             <div className="flex flex-col">
