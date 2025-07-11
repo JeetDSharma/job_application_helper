@@ -1,5 +1,4 @@
 import { PrismaClient } from "@/app/generated/prisma";
-import { Pinyon_Script } from "next/font/google";
 const prisma = new PrismaClient();
 
 export async function insertEmailLog(recipientId: string, jobPosition: string) {
