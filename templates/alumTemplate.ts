@@ -1,13 +1,13 @@
 type AlumTemplateParams = {
   name: string;
-  position: string;
+  job_position: string;
   company: string;
   university: string;
 };
 
 export function buildAlumTemplate({
   name,
-  position,
+  job_position,
   company,
   university,
 }: AlumTemplateParams): string {
@@ -19,7 +19,7 @@ export function buildAlumTemplate({
 
       <p>
         I noticed that we both attended <strong>${university}</strong>, and I always appreciate connecting with fellow alumni.
-        I recently came across the <strong>${position}</strong> position at <strong>${company}</strong> and believe it aligns perfectly with my skills and experience.
+        I recently came across the <strong>${job_position}</strong> position at <strong>${company}</strong> and believe it aligns perfectly with my skills and experience.
       </p>
 
       <p>

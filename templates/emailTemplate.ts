@@ -1,11 +1,11 @@
 type EmailTemplateParams = {
   name: string;
-  position: string;
+  job_position: string;
   company: string;
 };
 
 
-export function buildEmailTemplate({ name, company, position }: EmailTemplateParams) {
+export function buildEmailTemplate({ name, job_position, company }: EmailTemplateParams) {
   return `
     <div>
       <p>Hi ${name},</p>
@@ -13,7 +13,7 @@ export function buildEmailTemplate({ name, company, position }: EmailTemplatePar
       <p>I hope you're doing well.</p>
 
       <p>
-        I came across the <strong>${position}</strong> position at <strong>${company}</strong> and believe it aligns perfectly with my skills and experience.
+        I came across the <strong>${job_position}</strong> position at <strong>${company}</strong> and believe it aligns perfectly with my skills and experience.
         I'm highly interested in applying for this role.
       </p>
 
