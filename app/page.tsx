@@ -8,7 +8,7 @@ export default function Home() {
     email: "",
     name: "",
     company: "",
-    job_position: "",
+    jobPosition: "",
     isAlum: false
   });
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -126,11 +126,11 @@ export default function Home() {
             </div>
             <div className="flex flex-col">
 
-          <label htmlFor="job_position" className="text-sm font-medium text-gray-700">Job Position</label>
+          <label htmlFor="jobPosition" className="text-sm font-medium text-gray-700">Job Position</label>
           <input
             type="text"
-            id="job_position"
-            name="job_position"
+            id="jobPosition"
+            name="jobPosition"
             onChange={handleChange}
             className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500" 
             />
