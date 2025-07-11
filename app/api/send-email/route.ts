@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
     to: email,
     subject: `Application for ${job_position} at ${company}`,
-    html_body,
+    html: html_body,
     attachments: [
       {
         filename: RESUME_NAME,
