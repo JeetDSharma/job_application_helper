@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {email, name, company, job_position, isAlum} = body;
     console.log(body)
-
+    
     const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

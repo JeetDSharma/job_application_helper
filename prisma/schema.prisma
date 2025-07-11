@@ -27,6 +27,7 @@ model Recipient {
   companyId   String
   emailLogs   EmailLog[]
 
+  @@unique([email, companyId])
   @@index([email])
 }
 
