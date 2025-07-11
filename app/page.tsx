@@ -50,7 +50,7 @@ export default function Home() {
         
       } catch (error) {
         console.error("Send email error:", error);
-        alert("Something went wrong.");
+        toast.error("Failed to Send Email")
       }
     }
     sendEmail()

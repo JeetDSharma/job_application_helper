@@ -98,7 +98,7 @@ Nodemailer
 
 TypeScript
 
-Tailwind CSS (optional)
+Tailwind 
 
 HTML Email Templates
 
@@ -115,20 +115,10 @@ HTML Email Templates
 
 👨‍💻 Author
 Jeet Sharma
-🌐 jeetsharma.dev
-🔗 LinkedIn | GitHub
+🌐 jeetsharma.com
 
 📝 License
 MIT — free to use, improve, and adapt.
-
-yaml
-Copy
-Edit
-
----
-
-✅ You can copy-paste this directly into your `README.md`.  
-Want badges (like Build Passing, License, or Made with Next.js) at the top? Just say the word.
 
 
 
