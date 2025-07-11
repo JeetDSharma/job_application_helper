@@ -64,10 +64,10 @@ export default function Home() {
             id="isAlum"
             checked={emailForm.isAlum}
             onChange={handleChange}
-            className="h-4 w-4"
+            className="h-4 w-4 ml-4"
           />
           <span>Is Alum?</span></label>
-          <button type="button"  onClick={handleSubmit} className="border border-black py-2 px-4 rounded">Send Email</button>
+          <button type="button"  onClick={handleSubmit} className="border border-black py-2 px-4 rounded ml-4">Send Email</button>
         </form>
       </div>
     </div>
