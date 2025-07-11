@@ -49,6 +49,7 @@ export default function Home() {
         alert("Something went wrong.");
       }
     }
+    sendEmail()
   }
 
   return (
