@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📧 Email Sender App
 
-## Getting Started
+A full-stack email-sending tool built with **Next.js 15**, featuring dynamic HTML email templates, resume attachment, and Gmail SMTP integration using **Nodemailer**.
 
-First, run the development server:
+---
+
+## ✨ Features
+
+- 🔹 Built with **Next.js 15** (App Router)
+- 🔹 Uses **Nodemailer** for email delivery
+- 🔹 Dynamic email templates (Alumni-aware)
+- 🔹 Attaches your resume PDF
+- 🔹 Configurable via environment variables
+- 🔹 Sends through **Gmail SMTP** with App Password
+
+---
+
+## 🖼️ UI Preview
+
+> A simple form to collect:
+> - Email address
+> - Name
+> - Company
+> - Job Position
+> - "Is Alum" checkbox  
+> Sends a personalized email with resume attached.
+
+---
+
+## 📂 Project Structure
+
+📁 app/
+├── 📄 page.tsx # Frontend form
+└── 📁 api/send-email/route.ts # API handler
+
+📁 templates/
+├── 📄 alumTemplate.ts # Email template for alumni
+└── 📄 emailTemplate.ts # Default email template
+
+📁 public/
+└── 📄 resume.pdf # Resume to be attached
+
+📁 lib/
+└── 📄 constants.ts # Constants like university, filename
+
+📄 .env.local # Environment variables
+
+yaml
+Copy
+Edit
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repo
 
 ```bash
+git clone https://github.com/your-username/email-sender-app.git
+cd email-sender-app
+2. Install Dependencies
+bash
+Copy
+Edit
+npm install
+3. Add .env.local
+Create a .env.local file at the root:
+
+env
+Copy
+Edit
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+UNIVERSITY_NAME=Your University Name
+RESUME_NAME=Jeet_Sharma_Resume.pdf
+🔐 You must use a Gmail App Password: Generate one here
+
+4. Add Resume
+Place your resume.pdf file inside the public/ folder.
+
+5. Run the App
+bash
+Copy
+Edit
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Visit: http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🛠 How It Works
+The user fills out a form.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+On submit, data is sent via a POST request to /api/send-email.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The server:
 
-## Learn More
+Builds a custom HTML email depending on the isAlum flag.
 
-To learn more about Next.js, take a look at the following resources:
+Attaches a PDF resume.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Sends the email using Gmail via Nodemailer.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🔧 Tech Stack
+Next.js 15
 
-## Deploy on Vercel
+Nodemailer
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+TypeScript
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Tailwind CSS (optional)
+
+HTML Email Templates
+
+📈 Potential Enhancements
+✅ Client-side form validation
+
+✅ Email preview before sending
+
+✅ Upload resume instead of static file
+
+✅ Form submission state (loading, success, error)
+
+✅ Save logs to a DB (e.g. Supabase or PostgreSQL)
+
+👨‍💻 Author
+Jeet Sharma
+🌐 jeetsharma.dev
+🔗 LinkedIn | GitHub
+
+📝 License
+MIT — free to use, improve, and adapt.
+
+yaml
+Copy
+Edit
+
+---
+
+✅ You can copy-paste this directly into your `README.md`.  
+Want badges (like Build Passing, License, or Made with Next.js) at the top? Just say the word.
+
+
+
