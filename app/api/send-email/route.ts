@@ -64,13 +64,14 @@ export async function POST(req: NextRequest) {
   try {
     await transporter.sendMail(mailOptions);
     console.log("Sent");
-    await updateEmailStatus({ emailLogId });
+    await updateEmailStatus({ emailLogId, status: "SENT" });
     return NextResponse.json(
       { message: "Email Sent Successfully!" },
       { status: 200 }
     );
   } catch (err) {
     console.error(err);
+    await updateEmailStatus({ emailLogId, status: "FAILED" });
     return NextResponse.json(
       { error: "Failed to send email" },
       { status: 500 }
