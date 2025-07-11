@@ -1,10 +1,11 @@
-import nodemailer from "nodemailer";
+const nodemailer = require('nodemailer');
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
 import { buildEmailTemplate } from "@/templates/emailTemplate";
 import { UNIVERSITY_NAME } from "@/lib/constants";
+import { RESUME_NAME } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
     const body = await request.json();
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
     html_body,
     attachments: [
       {
-        filename: "Jeet_Sharma_Resume.pdf",
+        filename: RESUME_NAME,
         content: resumeFile,
         contentType: "application/pdf",
       },
