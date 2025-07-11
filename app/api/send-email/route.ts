@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const mailOptions = {
     from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
     to: email,
-    subject: `Application for ${job_position} at ${company}`,
+    subject: `Seeking Your Advice on ${job_position} Position at ${company}`,
     html: html_body,
     attachments: [
       {
