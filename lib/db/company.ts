@@ -5,6 +5,11 @@ type UpsertCompanyInput = {
   companyName: string;
 };
 
+type FetchCompanyInput = {
+  skip?: number;
+  take?: number;
+};
+
 export async function upsertCompany({
   companyName,
 }: UpsertCompanyInput): Promise<string> {
@@ -17,4 +22,17 @@ export async function upsertCompany({
     },
   });
   return response.id;
+}
+
+export async function fetchCompanyCount() {
+  const response = await prisma.company.count();
+  return response;
+}
+
+export async function fetchCompany({ skip, take }: FetchCompanyInput) {
+  const response = await prisma.company.findMany({
+    skip: skip || 0,
+    take: take || 10,
+  });
+  return response;
 }
