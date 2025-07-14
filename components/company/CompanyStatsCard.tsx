@@ -1,4 +1,8 @@
 import React from "react";
+import {
+  BuildingOffice2Icon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 
 type CompanyStatsCardInput = {
   companyCount: number;
@@ -10,17 +14,24 @@ function CompanyStatsCard({
   recipientCount,
 }: CompanyStatsCardInput) {
   return (
-    <div className="bg-gray-100 min-h-36">
-      <div className="max-w-lg flex flex-row items-center justify-center mx-auto min-h-32 shadow-md rounded-md cursor-pointer bg-cyan-200">
-        <div className="bg-cyan-100 shadow-sm mx-4 px-16 py-4">
-          <p className="font-semibold text-3xl text-left">{companyCount}</p>
-
-          <p className="text-sm">Total Companies</p>
+    <div className="w-full max-w-3xl mx-auto py-6 px-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Company Card */}
+        <div className="flex items-center space-x-4 p-6 bg-cyan-100 rounded-lg shadow-md transition hover:shadow-xl hover:scale-[1.02] cursor-pointer">
+          <BuildingOffice2Icon className="h-10 w-10 text-cyan-600" />
+          <div>
+            <p className="text-3xl font-bold text-gray-800">{companyCount}</p>
+            <p className="text-sm text-gray-700">Total Companies</p>
+          </div>
         </div>
-        <div className="bg-cyan-100 shadow-sm mx-4 px-16 py-4">
-          <p className="font-semibold text-3xl text-left">{recipientCount}</p>
 
-          <p className="text-sm">Total Recipients</p>
+        {/* Recipient Card */}
+        <div className="flex items-center space-x-4 p-6 bg-cyan-100 rounded-lg shadow-md transition hover:shadow-xl hover:scale-[1.02] cursor-pointer">
+          <UserGroupIcon className="h-10 w-10 text-cyan-600" />
+          <div>
+            <p className="text-3xl font-bold text-gray-800">{recipientCount}</p>
+            <p className="text-sm text-gray-700">Total Recipients</p>
+          </div>
         </div>
       </div>
     </div>
