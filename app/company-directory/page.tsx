@@ -9,8 +9,17 @@ type CompanyTableInput = {
   createdAt: Date;
 };
 
+type CompanyStatsInput = {
+  companyCount: number;
+  recipientCount: number;
+};
+
 export function CompanyDirectory() {
   const [companyData, setCompanyData] = useState<CompanyTableInput[]>([]);
+  const [companyStats, setCompanyStats] = useState<CompanyStatsInput>({
+    companyCount: 0,
+    recipientCount: 0,
+  });
 
   useEffect(() => {
     async function fetchCompanyData() {
@@ -23,16 +32,18 @@ export function CompanyDirectory() {
         console.error("Failed to fetch company data:", error);
       }
     }
-    // async function fetchCompanyStats() {
-    //   try {
-    //     const response = await fetchCompanyCount();
-    //     console.log(response);
-    //   } catch (error) {
-    //     console.error("Failed to fetch company stats data:", error);
-    //   }
-    // }
+    async function fetchCompanyStats() {
+      try {
+        const response = await fetch("/api/fetch-company-stats");
+        const data = await response.json();
+        console.log(data);
+        setCompanyStats(data);
+      } catch (error) {
+        console.error("Failed to fetch company stats data:", error);
+      }
+    }
     fetchCompanyData();
-    // fetchCompanyStats();
+    fetchCompanyStats();
   }, []);
 
   const companyTableInput: CompanyTableInput[] = [
@@ -45,7 +56,10 @@ export function CompanyDirectory() {
 
   return (
     <div className="flex flex-col">
-      <CompanyStatsCard companyCount={0} recipientCount={0} />
+      <CompanyStatsCard
+        companyCount={companyStats.companyCount}
+        recipientCount={companyStats.recipientCount}
+      />
       <div className="flex flex-wrap gap-8 mx-auto justify-center px-4">
         {companyData.map((company) => (
           <CompanyCard

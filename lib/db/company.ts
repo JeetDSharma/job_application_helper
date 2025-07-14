@@ -40,7 +40,7 @@ export async function fetchCompanyCount() {
 
 export async function fetchCompany({
   skip = 0,
-  take = 10,
+  take = 20,
 }: FetchCompanyInput): Promise<CompanyTableInput[]> {
   const response = await prisma.company.findMany({
     skip,
