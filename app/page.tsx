@@ -2,6 +2,14 @@
 import Image from "next/image";
 import React, { useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import {
+  FaEnvelope,
+  FaBuilding,
+  FaUser,
+  FaBriefcase,
+  FaGraduationCap,
+  FaPaperPlane,
+} from "react-icons/fa";
 
 export default function Home() {
   const [emailForm, setEmailForm] = useState({
@@ -85,6 +93,7 @@ export default function Home() {
           <h1 className="text-2xl font-semibold text-center mb-6">
             Send Email
           </h1>
+
           <form
             className="flex flex-col gap-4"
             onSubmit={(e) => {
@@ -95,9 +104,9 @@ export default function Home() {
             <div className="flex flex-col">
               <label
                 htmlFor="email"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
-                Email
+                <FaEnvelope /> Email
               </label>
               <input
                 type="email"
@@ -107,12 +116,13 @@ export default function Home() {
                 className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
               />
             </div>
+
             <div className="flex flex-col">
               <label
                 htmlFor="company"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
-                Company Name
+                <FaBuilding /> Company Name
               </label>
               <input
                 type="text"
@@ -122,12 +132,13 @@ export default function Home() {
                 className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
               />
             </div>
+
             <div className="flex flex-col">
               <label
                 htmlFor="name"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
-                Name
+                <FaUser /> Name
               </label>
               <input
                 type="text"
@@ -137,12 +148,13 @@ export default function Home() {
                 className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
               />
             </div>
+
             <div className="flex flex-col">
               <label
                 htmlFor="jobPosition"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
-                Job Position
+                <FaBriefcase /> Job Position
               </label>
               <input
                 type="text"
@@ -152,21 +164,27 @@ export default function Home() {
                 className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
               />
             </div>
+
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="isAlum"
                 checked={emailForm.isAlum}
                 onChange={handleChange}
-                className=""
               />
-              <label className="text-sm"> Is Alum?</label>
+              <label
+                htmlFor="isAlum"
+                className="text-sm flex items-center gap-1"
+              >
+                <FaGraduationCap /> Is Alum?
+              </label>
             </div>
+
             <button
               type="submit"
-              className="border border-black rounded-md px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white"
+              className="flex items-center justify-center gap-2 border border-black rounded-md px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white"
             >
-              Send Email
+              <FaPaperPlane /> Send Email
             </button>
           </form>
         </div>
