@@ -9,7 +9,7 @@ type CompanyTableInput = {
 type CompanyTableProps = {
   companyTableInput: CompanyTableInput[];
 };
-export function CompanyTable({ companyTableInput }: CompanyTableProps) {
+function CompanyTable({ companyTableInput }: CompanyTableProps) {
   console.log(companyTableInput);
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">

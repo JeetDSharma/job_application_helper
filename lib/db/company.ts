@@ -9,6 +9,11 @@ type FetchCompanyInput = {
   skip?: number;
   take?: number;
 };
+type CompanyTableInput = {
+  companyName: string;
+  createdAt: Date;
+  recipientCount: number;
+};
 
 export async function upsertCompany({
   companyName,
@@ -25,14 +30,32 @@ export async function upsertCompany({
 }
 
 export async function fetchCompanyCount() {
-  const response = await prisma.company.count();
-  return response;
+  const companyCountResponse = await prisma.company.count();
+  const recipientCountResponse = await prisma.recipient.count();
+  return {
+    companyCount: companyCountResponse,
+    recipientCount: recipientCountResponse,
+  };
 }
 
-export async function fetchCompany({ skip, take }: FetchCompanyInput) {
+export async function fetchCompany({
+  skip = 0,
+  take = 10,
+}: FetchCompanyInput): Promise<CompanyTableInput[]> {
   const response = await prisma.company.findMany({
-    skip: skip || 0,
-    take: take || 10,
+    skip,
+    take,
+    select: {
+      companyName: true,
+      createdAt: true,
+      _count: {
+        select: { recipients: true },
+      },
+    },
   });
-  return response;
+  return response.map((company) => ({
+    companyName: company.companyName,
+    createdAt: company.createdAt,
+    recipientCount: company._count.recipients,
+  }));
 }
