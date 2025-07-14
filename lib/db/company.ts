@@ -18,10 +18,11 @@ type CompanyTableInput = {
 export async function upsertCompany({
   companyName,
 }: UpsertCompanyInput): Promise<string> {
+  const companyNameNormalized = companyName.toLowerCase();
   const response = await prisma.company.upsert({
-    where: { companyName },
+    where: { companyName: companyNameNormalized },
     update: {},
-    create: { companyName },
+    create: { companyName: companyNameNormalized },
     select: {
       id: true,
     },
