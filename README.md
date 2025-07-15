@@ -22,8 +22,7 @@ Create a .env.local file at the root:
 env
 SMTP_USER=your_email@gmail.com
 SMTP_PASS=your_app_password
-UNIVERSITY_NAME=Your University Name
-RESUME_NAME=Jeet_Sharma_Resume.pdf
+DATABASE_URL=your_db_url
 🔐 You must use a Gmail App Password
 
 4. Add Resume
