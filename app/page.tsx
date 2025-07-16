@@ -55,7 +55,7 @@ export default function Home() {
           </button>
         </span>
       ),
-      { duration: 10000 }
+      { duration: 6000 }
     );
 
     timerRef.current = setTimeout(async () => {
@@ -82,7 +82,7 @@ export default function Home() {
         setIsPending(false);
         timerRef.current = null;
       }
-    }, 10000);
+    }, 6000);
   };
 
   return (
