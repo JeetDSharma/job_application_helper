@@ -12,9 +12,6 @@ A full-stack email-sending tool built with **Next.js 15**, featuring dynamic HTM
 git clone https://github.com/your-username/email-sender-app.git
 cd email-sender-app
 2. Install Dependencies
-bash
-Copy
-Edit
 npm install
 3. Add .env.local
 Create a .env.local file at the root:
