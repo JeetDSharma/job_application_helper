@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
 import { buildEmailTemplate } from "@/templates/emailTemplate";
-import { UNIVERSITY_NAME } from "@/lib/constants";
+import { UNIVERSITY_NAME, YOUR_NAME } from "@/lib/constants";
 import { RESUME_NAME } from "@/lib/constants";
 import { PrismaClient } from "@/app/generated/prisma";
 import { upsertCompany } from "@/lib/db/company";
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     : buildEmailTemplate({ name, jobPosition, company });
 
   const mailOptions = {
-    from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
+    from: `"${YOUR_NAME}" <${process.env.SMTP_USER}>`,
     to: email,
     subject: `Seeking Your Advice on ${jobPosition} Position at ${company}`,
     html: html_body,
