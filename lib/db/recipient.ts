@@ -17,7 +17,9 @@ export async function upsertRecipient({
   const normalizedName = name.toLowerCase();
   const response = await prisma.recipient.upsert({
     where: { email },
-    update: {},
+    update: {
+      isAlumni,
+    },
     create: { email, name: normalizedName, isAlumni, companyId },
     select: {
       id: true,
