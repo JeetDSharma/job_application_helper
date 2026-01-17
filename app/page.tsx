@@ -102,15 +102,21 @@ export default function Home() {
   const handleCopyLinkedInMessage = () => {
     const name = emailForm.name || "";
     const company = emailForm.company || "";
-    // const linkedInMessage = emailForm.isAlum
-    //   ? `Hi ${name},\n\nI'm Jeet, MSCS student at UMass Amherst. As a fellow alum, it’s inspiring to see your impactful work at ${company}. I have 1+ year of experience in building scalable apps. I excel in software engineering, data analysis & development. I’d appreciate if you could refer me for any open software positions. Thanks!`
-    //   : `Hi ${name},\n\nI'm Jeet, MSCS student at UMass Amherst. I am impressed by your work at ${company}. I have 1+ year of experience in building scalable apps. I excel in software engineering, data analysis & development. I’d appreciate if you could refer me for any open software positions. Thanks!`;
-    // const linkedInMessage = emailForm.isAlum
-    //   ? `Hi ${name},\n\nI'm Jeet, an MSCS student at UMass Amherst. It is great to see a UMass Alum working at ${company}, I would love to connect and ask a few questions about what makes a great engineer. Looking forward to learning from your experience.`
-    //   : `Hi ${name},\n\nI'm Jeet, an MSCS student at UMass Amherst. I came across your work at ${company} and found it super interesting. I would love to connect and ask a few questions about what makes a great engineer. Looking forward to learning from your experience.`;
-    const linkedInMessage = emailForm.isAlum
-      ? `Hi ${name},\n\nI'm Jeet, an MSCS student at UMass Amherst. I'm actively job searching and would love your insight on ${company}'s engineering culture and what helped you succeed there. I would really value 10-15 minutes of your time for a quick chat.`
-      : `Hi ${name}, I’m Jeet, MSCS at UMass Amherst. I’m exploring engineering roles at ${company} and want to focus on what actually moves candidates forward. From your experience, what is the single signal your team treats as most predictive of success? Even one line would help me target my preparation`;
+    const jobPosition = emailForm.jobPosition || "engineering role";
+
+    let linkedInMessage = "";
+
+    if (emailForm.isRecruiter) {
+      // Recruiter-specific message: Direct, value-first, clear ask
+      linkedInMessage = `Hi ${name},\n\nI'm a founding engineer with 2+ years building and owning production backend and full-stack systems. Graduating May 2026 from UMass Amherst (MSCS). Saw the ${jobPosition} role at ${company}. Open to a quick chat this week if you think there's a fit.`;
+    } else if (emailForm.isAlum) {
+      // Alumni message: Shared background, authentic networking
+      linkedInMessage = `Hi ${name},\n\nJeet here, MSCS at UMass Amherst (May 2026). Great to see a fellow alum at ${company}. I've spent 2+ years as a founding engineer shipping production systems and I'm exploring roles now. Would love 10 minutes of your time to hear about your experience there and what helped you succeed.`;
+    } else {
+      // Non-alum engineer message: Respect their expertise, targeted question
+      linkedInMessage = `Hi ${name},\n\nJeet, MSCS at UMass Amherst (May 2026). I've been building production systems as a founding engineer for 2+ years and I'm exploring roles at ${company}. From your experience, what's the single most important signal your team looks for when evaluating engineers? Even one insight would help me focus my prep.`;
+    }
+
     navigator.clipboard
       .writeText(linkedInMessage)
       .then(() => {
