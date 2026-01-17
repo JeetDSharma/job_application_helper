@@ -75,11 +75,14 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Mail options, including attachments
+  const emailSubject = isRecruiter
+    ? `${jobPosition} - UMass CS Grad | Immediate Availability`
+    : `Seeking to Learn From Your Journey to ${company}`;
+
   const mailOptions = {
     from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
     to: email,
-    subject: `Seeking to Learn From Your Journey to ${company}`,
+    subject: emailSubject,
     html: html_body,
     attachments: [
       {
