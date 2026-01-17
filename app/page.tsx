@@ -310,34 +310,38 @@ export default function Home() {
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isAlum"
-                checked={emailForm.isAlum}
-                onChange={handleChange}
-              />
-              <label
-                htmlFor="isAlum"
-                className="text-sm flex items-center gap-1"
-              >
-                <FaGraduationCap /> Is Alum?
-              </label>
-            </div>
+            <div className="flex flex-col sm:flex-row gap-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isAlum"
+                  checked={emailForm.isAlum}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                />
+                <label
+                  htmlFor="isAlum"
+                  className="text-sm font-medium flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FaGraduationCap className="text-indigo-600" /> Is Alumni?
+                </label>
+              </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isRecruiter"
-                checked={emailForm.isRecruiter}
-                onChange={handleChange}
-              />
-              <label
-                htmlFor="isRecruiter"
-                className="text-sm flex items-center gap-1"
-              >
-                <FaBriefcase /> Is Recruiter?
-              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isRecruiter"
+                  checked={emailForm.isRecruiter}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                />
+                <label
+                  htmlFor="isRecruiter"
+                  className="text-sm font-medium flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FaBriefcase className="text-indigo-600" /> Is Recruiter?
+                </label>
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mt-2">
