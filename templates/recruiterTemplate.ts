@@ -22,7 +22,7 @@ export function buildRecruiterTemplate({
       <p style="margin: 0 0 16px 0; font-size: 15px;">Hi ${name},</p>
 
       <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.5;">
-        I saw the <strong style="color: #2563eb;">${jobPosition}</strong> role at ${company}. This is exactly what I've been building for the past 2 years as a founding engineer. I'm graduating <strong>May 2026</strong> from UMass Amherst (MSCS, GPA 3.86) and can start immediately after.
+        I saw the <strong style="color: #2563eb;">${jobPosition}</strong> role at ${company}. I've spent the last 2+ years building and owning production backend and full-stack systems that closely match this role. I'm graduating <strong>May 2026</strong> from UMass Amherst (MSCS, GPA 3.86) and can start immediately after.
       </p>
 
       <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 16px 20px; margin: 0 0 20px 0; border-radius: 4px;">
