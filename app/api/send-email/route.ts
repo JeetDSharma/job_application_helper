@@ -5,6 +5,7 @@ import path from "path";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
 import { buildEmailTemplate } from "@/templates/emailTemplate";
 import { buildRecruiterTemplate } from "@/templates/recruiterTemplate";
+import { buildFollowUpTemplate } from "@/templates/followUpTemplate";
 import { UNIVERSITY_NAME } from "@/lib/constants";
 import { RESUME_NAME } from "@/lib/constants";
 import { PrismaClient } from "@/app/generated/prisma";
@@ -24,12 +25,15 @@ export async function POST(req: NextRequest) {
     isRecruiter,
     tenureYears,
     personalMention,
+    isFollowUp,
   } = body; // Get new fields
   console.log(body);
 
   // Determine template type
   let templateUsed = "GENERIC";
-  if (isRecruiter) {
+  if (isFollowUp) {
+    templateUsed = "FOLLOWUP";
+  } else if (isRecruiter) {
     templateUsed = "RECRUITER";
   } else if (isAlum) {
     templateUsed = "ALUMNI";
@@ -59,9 +63,16 @@ export async function POST(req: NextRequest) {
   const resumePath = path.join(process.cwd(), "public", "resume.pdf");
   const resumeFile = fs.readFileSync(resumePath);
 
-  // Decide which template to use based on whether they are an alum or not
+  // Decide which template to use
   let html_body;
-  if (isRecruiter) {
+  if (isFollowUp) {
+    html_body = buildFollowUpTemplate({
+      name,
+      company,
+      jobPosition,
+      isRecruiter: isRecruiter || false,
+    });
+  } else if (isRecruiter) {
     html_body = buildRecruiterTemplate({
       name,
       jobPosition,
@@ -84,9 +95,11 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const emailSubject = isRecruiter
-    ? `${jobPosition} - Founding Engineer w/ 2 YOE | May 2026 Grad`
-    : `Seeking to Learn From Your Journey to ${company}`;
+  const emailSubject = isFollowUp
+    ? `Following up - ${jobPosition} at ${company}`
+    : isRecruiter
+      ? `${jobPosition} - Founding Engineer w/ 2 YOE | May 2026 Grad`
+      : `Seeking to Learn From Your Journey to ${company}`;
 
   const mailOptions = {
     from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
