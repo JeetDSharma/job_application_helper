@@ -22,7 +22,7 @@ export function buildRecruiterTemplate({
       <p style="margin: 0 0 16px 0; font-size: 15px;">Hi ${name},</p>
 
       <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.5;">
-        I saw the <strong style="color: #2563eb;">${jobPosition}</strong> role at ${company}—this is exactly what I've been building for the past 2 years as a founding engineer. I'm graduating <strong>May 2026</strong> from UMass Amherst (MSCS, GPA 3.86) and can start immediately after.
+        I saw the <strong style="color: #2563eb;">${jobPosition}</strong> role at ${company}. This is exactly what I've been building for the past 2 years as a founding engineer. I'm graduating <strong>May 2026</strong> from UMass Amherst (MSCS, GPA 3.86) and can start immediately after.
       </p>
 
       <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 16px 20px; margin: 0 0 20px 0; border-radius: 4px;">
@@ -51,7 +51,7 @@ export function buildRecruiterTemplate({
 
       <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.5;">
         <strong style="color: #059669;">✓ US work authorized</strong> • <strong style="color: #059669;">✓ May 2026 start</strong><br/>
-        Resume attached. Happy to chat if you think there's a fit—my calendar is pretty open this week.
+        Resume attached. Happy to chat if you think there's a fit. My calendar is pretty open this week.
       </p>
 
       <p style="margin: 0 0 20px 0; font-size: 15px; color: #1e293b;">
