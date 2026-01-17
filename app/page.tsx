@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import {
   FaEnvelope,
@@ -11,6 +11,10 @@ import {
   FaPaperPlane,
   FaLinkedin,
   FaEye,
+  FaExclamationTriangle,
+  FaClock,
+  FaCheckCircle,
+  FaTimesCircle,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
@@ -36,6 +40,22 @@ export default function Home() {
     emailHtml: "",
     emailSubject: "",
   });
+  const [recipientCheck, setRecipientCheck] = useState<{
+    exists: boolean;
+    loading: boolean;
+    data?: {
+      name: string;
+      email: string;
+      isAlumni: boolean;
+      company: string;
+      emailLogs: Array<{
+        sentAt: string;
+        status: string;
+        jobPosition: string;
+      }>;
+    };
+  }>({ exists: false, loading: false });
+  const emailCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
@@ -44,6 +64,44 @@ export default function Home() {
       ...prev,
       [id]: type === "checkbox" ? checked : value,
     }));
+
+    // Trigger email check when email field changes
+    if (id === "email" && type !== "checkbox") {
+      if (emailCheckTimeout.current) {
+        clearTimeout(emailCheckTimeout.current);
+      }
+
+      if (value.trim() && value.includes("@")) {
+        setRecipientCheck({ exists: false, loading: true });
+        emailCheckTimeout.current = setTimeout(() => {
+          checkRecipient(value);
+        }, 500);
+      } else {
+        setRecipientCheck({ exists: false, loading: false });
+      }
+    }
+  };
+
+  const checkRecipient = async (email: string) => {
+    try {
+      const response = await fetch(
+        `/api/check-recipient?email=${encodeURIComponent(email)}`,
+      );
+      const data = await response.json();
+
+      if (data.exists) {
+        setRecipientCheck({
+          exists: true,
+          loading: false,
+          data: data.recipient,
+        });
+      } else {
+        setRecipientCheck({ exists: false, loading: false });
+      }
+    } catch (error) {
+      console.error("Error checking recipient:", error);
+      setRecipientCheck({ exists: false, loading: false });
+    }
   };
 
   const handleSubmit = async () => {
@@ -222,6 +280,61 @@ export default function Home() {
                 onChange={handleChange}
                 className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
               />
+
+              {/* Loading indicator */}
+              {recipientCheck.loading && (
+                <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                  <FaClock className="animate-spin" />
+                  <span>Checking contact...</span>
+                </div>
+              )}
+
+              {/* Existing contact warning */}
+              {recipientCheck.exists && recipientCheck.data && (
+                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-300 rounded-md">
+                  <div className="flex items-start gap-2">
+                    <FaExclamationTriangle className="text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-yellow-800">
+                        Contact already exists
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        <strong>{recipientCheck.data.name}</strong> at{" "}
+                        <strong>{recipientCheck.data.company}</strong>
+                      </p>
+
+                      {recipientCheck.data.emailLogs.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          <p className="text-xs font-medium text-yellow-800">
+                            Previous emails:
+                          </p>
+                          {recipientCheck.data.emailLogs
+                            .slice(0, 3)
+                            .map((log, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center gap-2 text-xs text-yellow-700"
+                              >
+                                {log.status === "SENT" ? (
+                                  <FaCheckCircle className="text-green-600 flex-shrink-0" />
+                                ) : log.status === "FAILED" ? (
+                                  <FaTimesCircle className="text-red-600 flex-shrink-0" />
+                                ) : (
+                                  <FaClock className="text-gray-600 flex-shrink-0" />
+                                )}
+                                <span>
+                                  {log.jobPosition} -{" "}
+                                  {new Date(log.sentAt).toLocaleDateString()} (
+                                  {log.status})
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col">
