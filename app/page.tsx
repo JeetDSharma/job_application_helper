@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useState, useRef, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import {
@@ -15,6 +16,7 @@ import {
   FaClock,
   FaCheckCircle,
   FaTimesCircle,
+  FaHistory,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
@@ -255,9 +257,15 @@ export default function Home() {
       />
       <div className="min-h-screen flex justify-center items-center bg-gray-100">
         <div className="bg-white p-8 shadow-md rounded-lg w-lg">
-          <h1 className="text-2xl font-semibold text-center mb-6">
-            Send Email
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-semibold">Send Email</h1>
+            <Link
+              href="/history"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-md transition"
+            >
+              <FaHistory /> Email History
+            </Link>
+          </div>
 
           <form
             className="flex flex-col gap-4"
