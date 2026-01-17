@@ -10,7 +10,13 @@ import {
   FaGraduationCap,
   FaPaperPlane,
   FaLinkedin,
+  FaEye,
 } from "react-icons/fa";
+import PreviewModal from "@/components/PreviewModal";
+import { buildAlumTemplate } from "@/templates/alumTemplate";
+import { buildEmailTemplate } from "@/templates/emailTemplateNew";
+import { buildRecruiterTemplate } from "@/templates/recruiterTemplate";
+import { UNIVERSITY_NAME } from "@/lib/constants";
 
 export default function Home() {
   const [emailForm, setEmailForm] = useState({
@@ -25,6 +31,11 @@ export default function Home() {
   });
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const [previewModal, setPreviewModal] = useState({
+    isOpen: false,
+    emailHtml: "",
+    emailSubject: "",
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
@@ -99,6 +110,53 @@ export default function Home() {
     }, 6000);
   };
 
+  const generateEmailPreview = () => {
+    const {
+      name,
+      jobPosition,
+      company,
+      isAlum,
+      isRecruiter,
+      tenureYears,
+      personalMention,
+    } = emailForm;
+
+    let html_body = "";
+    let emailSubject = "";
+
+    if (isRecruiter) {
+      html_body = buildRecruiterTemplate({
+        name,
+        jobPosition,
+        company,
+      });
+      emailSubject = `${jobPosition} - Founding Engineer w/ 2 YOE | May 2026 Grad`;
+    } else if (isAlum) {
+      html_body = buildAlumTemplate({
+        name,
+        jobPosition,
+        company,
+        university: UNIVERSITY_NAME,
+      });
+      emailSubject = `Seeking to Learn From Your Journey to ${company}`;
+    } else {
+      html_body = buildEmailTemplate({
+        name,
+        jobPosition,
+        company,
+        tenureYears: tenureYears ? Number(tenureYears) : undefined,
+        personalMention: personalMention || undefined,
+      });
+      emailSubject = `Seeking to Learn From Your Journey to ${company}`;
+    }
+
+    setPreviewModal({
+      isOpen: true,
+      emailHtml: html_body,
+      emailSubject,
+    });
+  };
+
   const handleCopyLinkedInMessage = () => {
     const name = emailForm.name || "";
     const company = emailForm.company || "";
@@ -130,6 +188,13 @@ export default function Home() {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
+      <PreviewModal
+        isOpen={previewModal.isOpen}
+        onClose={() => setPreviewModal({ ...previewModal, isOpen: false })}
+        emailHtml={previewModal.emailHtml}
+        emailSubject={previewModal.emailSubject}
+        recipientEmail={emailForm.email}
+      />
       <div className="min-h-screen flex justify-center items-center bg-gray-100">
         <div className="bg-white p-8 shadow-md rounded-lg w-lg">
           <h1 className="text-2xl font-semibold text-center mb-6">
@@ -275,20 +340,28 @@ export default function Home() {
               </label>
             </div>
 
-            <button
-              type="submit"
-              className="flex items-center justify-center gap-2 border border-black rounded-md px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white"
-            >
-              <FaPaperPlane /> Send Email
-            </button>
-            <button
-              type="button"
-              onClick={handleCopyLinkedInMessage}
-              className="flex items-center justify-center gap-2 border border-black rounded-md px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              <FaLinkedin />
-              Copy LinkedIn Message
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 mt-2">
+              <button
+                type="button"
+                onClick={generateEmailPreview}
+                className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-md px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-medium transition shadow-sm"
+              >
+                <FaEye /> Preview
+              </button>
+              <button
+                type="submit"
+                className="flex-1 flex items-center justify-center gap-2 border border-indigo-600 rounded-md px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-medium transition shadow-sm"
+              >
+                <FaPaperPlane /> Send Email
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyLinkedInMessage}
+                className="flex-1 flex items-center justify-center gap-2 border border-blue-600 rounded-md px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium transition shadow-sm"
+              >
+                <FaLinkedin /> LinkedIn
+              </button>
+            </div>
           </form>
         </div>
       </div>
