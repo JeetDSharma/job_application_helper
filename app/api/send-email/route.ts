@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   }
 
   const emailSubject = isRecruiter
-    ? `${jobPosition} - UMass CS Grad | Immediate Availability`
+    ? `${jobPosition} - Founding Engineer w/ 2 YOE | May 2026 Grad`
     : `Seeking to Learn From Your Journey to ${company}`;
 
   const mailOptions = {
