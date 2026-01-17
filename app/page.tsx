@@ -58,6 +58,55 @@ export default function Home() {
     };
   }>({ exists: false, loading: false });
   const emailCheckTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [formErrors, setFormErrors] = useState({
+    email: "",
+    name: "",
+    company: "",
+    jobPosition: "",
+  });
+  const [touched, setTouched] = useState({
+    email: false,
+    name: false,
+    company: false,
+    jobPosition: false,
+  });
+
+  const validateEmail = (email: string): string => {
+    if (!email.trim()) return "Email is required";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return "Please enter a valid email address";
+    return "";
+  };
+
+  const validateField = (fieldName: string, value: string): string => {
+    if (fieldName === "email") return validateEmail(value);
+    if (!value.trim()) {
+      const fieldLabels: { [key: string]: string } = {
+        name: "Name",
+        company: "Company",
+        jobPosition: "Job Position",
+      };
+      return `${fieldLabels[fieldName]} is required`;
+    }
+    return "";
+  };
+
+  const isFormValid = (): boolean => {
+    return (
+      emailForm.email.trim() !== "" &&
+      validateEmail(emailForm.email) === "" &&
+      emailForm.name.trim() !== "" &&
+      emailForm.company.trim() !== "" &&
+      emailForm.jobPosition.trim() !== ""
+    );
+  };
+
+  const handleBlur = (fieldName: string) => {
+    setTouched((prev) => ({ ...prev, [fieldName]: true }));
+    const value = emailForm[fieldName as keyof typeof emailForm] as string;
+    const error = validateField(fieldName, value);
+    setFormErrors((prev) => ({ ...prev, [fieldName]: error }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
@@ -66,6 +115,12 @@ export default function Home() {
       ...prev,
       [id]: type === "checkbox" ? checked : value,
     }));
+
+    // Validate field on change if already touched
+    if (type !== "checkbox" && touched[id as keyof typeof touched]) {
+      const error = validateField(id, value);
+      setFormErrors((prev) => ({ ...prev, [id]: error }));
+    }
 
     // Trigger email check when email field changes
     if (id === "email" && type !== "checkbox") {
@@ -108,6 +163,26 @@ export default function Home() {
 
   const handleSubmit = async () => {
     if (isPending) return;
+
+    // Validate all fields before submitting
+    if (!isFormValid()) {
+      // Mark all fields as touched to show errors
+      setTouched({
+        email: true,
+        name: true,
+        company: true,
+        jobPosition: true,
+      });
+      setFormErrors({
+        email: validateEmail(emailForm.email),
+        name: validateField("name", emailForm.name),
+        company: validateField("company", emailForm.company),
+        jobPosition: validateField("jobPosition", emailForm.jobPosition),
+      });
+      toast.error("Please fill in all required fields correctly");
+      return;
+    }
+
     setIsPending(true);
 
     toast(
@@ -144,6 +219,7 @@ export default function Home() {
         const data = await response.json();
         if (response.ok) {
           toast.success("Email Sent Successfully!");
+          // Reset only optional fields, keep recipient info for potential follow-up
           setEmailForm({
             email: emailForm.email,
             name: emailForm.name,
@@ -153,6 +229,19 @@ export default function Home() {
             isRecruiter: emailForm.isRecruiter,
             tenureYears: "",
             personalMention: "",
+          });
+          // Reset validation errors
+          setFormErrors({
+            email: "",
+            name: "",
+            company: "",
+            jobPosition: "",
+          });
+          setTouched({
+            email: false,
+            name: false,
+            company: false,
+            jobPosition: false,
           });
         } else {
           console.error(
@@ -218,8 +307,8 @@ export default function Home() {
   };
 
   const handleCopyLinkedInMessage = () => {
-    const name = emailForm.name || "";
-    const company = emailForm.company || "";
+    const name = emailForm.name || "there";
+    const company = emailForm.company || "your company";
     const jobPosition = emailForm.jobPosition || "engineering role";
 
     let linkedInMessage = "";
@@ -279,15 +368,25 @@ export default function Home() {
                 htmlFor="email"
                 className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
-                <FaEnvelope /> Email
+                <FaEnvelope /> Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
                 name="email"
                 id="email"
+                value={emailForm.email}
                 onChange={handleChange}
-                className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+                onBlur={() => handleBlur("email")}
+                required
+                className={`border mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring ${
+                  touched.email && formErrors.email
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-indigo-500"
+                }`}
               />
+              {touched.email && formErrors.email && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+              )}
 
               {/* Loading indicator */}
               {recipientCheck.loading && (
@@ -350,15 +449,28 @@ export default function Home() {
                 htmlFor="company"
                 className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
-                <FaBuilding /> Company Name
+                <FaBuilding /> Company Name{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 name="company"
                 id="company"
+                value={emailForm.company}
                 onChange={handleChange}
-                className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+                onBlur={() => handleBlur("company")}
+                required
+                className={`border mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring ${
+                  touched.company && formErrors.company
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-indigo-500"
+                }`}
               />
+              {touched.company && formErrors.company && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.company}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col">
@@ -366,15 +478,25 @@ export default function Home() {
                 htmlFor="name"
                 className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
-                <FaUser /> Name
+                <FaUser /> Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 name="name"
                 id="name"
+                value={emailForm.name}
                 onChange={handleChange}
-                className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+                onBlur={() => handleBlur("name")}
+                required
+                className={`border mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring ${
+                  touched.name && formErrors.name
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-indigo-500"
+                }`}
               />
+              {touched.name && formErrors.name && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+              )}
             </div>
 
             <div className="flex flex-col">
@@ -382,15 +504,28 @@ export default function Home() {
                 htmlFor="jobPosition"
                 className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
-                <FaBriefcase /> Job Position
+                <FaBriefcase /> Job Position{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 id="jobPosition"
                 name="jobPosition"
+                value={emailForm.jobPosition}
                 onChange={handleChange}
-                className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+                onBlur={() => handleBlur("jobPosition")}
+                required
+                className={`border mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring ${
+                  touched.jobPosition && formErrors.jobPosition
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-indigo-500"
+                }`}
               />
+              {touched.jobPosition && formErrors.jobPosition && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.jobPosition}
+                </p>
+              )}
             </div>
 
             {/* Tenure Input */}
@@ -469,20 +604,30 @@ export default function Home() {
               <button
                 type="button"
                 onClick={generateEmailPreview}
-                className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-md px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-medium transition shadow-sm"
+                disabled={!isFormValid()}
+                className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                  isFormValid()
+                    ? "border-gray-300 bg-white hover:bg-gray-50 text-gray-700 cursor-pointer"
+                    : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                }`}
               >
                 <FaEye /> Preview
               </button>
               <button
                 type="submit"
-                className="flex-1 flex items-center justify-center gap-2 border border-indigo-600 rounded-md px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-medium transition shadow-sm"
+                disabled={!isFormValid() || isPending}
+                className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                  isFormValid() && !isPending
+                    ? "border-indigo-600 bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
+                    : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
               >
                 <FaPaperPlane /> Send Email
               </button>
               <button
                 type="button"
                 onClick={handleCopyLinkedInMessage}
-                className="flex-1 flex items-center justify-center gap-2 border border-blue-600 rounded-md px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium transition shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 border border-blue-600 rounded-md px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium transition shadow-sm cursor-pointer"
               >
                 <FaLinkedin /> LinkedIn
               </button>
