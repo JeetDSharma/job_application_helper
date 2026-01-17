@@ -42,3 +42,4 @@ next-env.d.ts
 
 /app/generated/prisma
 arch_db/dev.db
+prisma/dev.db

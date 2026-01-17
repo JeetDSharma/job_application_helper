@@ -22,45 +22,40 @@ export function buildRecruiterTemplate({
       <p style="margin: 0 0 16px 0; font-size: 15px;">Hi ${name},</p>
 
       <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.5;">
-        I saw you're hiring for <strong style="color: #2563eb;">${jobPosition}</strong> at ${company}. I'm graduating <strong>May 2026</strong> (UMass Amherst, CS, GPA 3.86) with <strong>2+ years production engineering</strong> experience.
+        I saw the <strong style="color: #2563eb;">${jobPosition}</strong> role at ${company}—this is exactly what I've been building for the past 2 years as a founding engineer. I'm graduating <strong>May 2026</strong> from UMass Amherst (MSCS, GPA 3.86) and can start immediately after.
       </p>
 
       <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 16px 20px; margin: 0 0 20px 0; border-radius: 4px;">
-        <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1e293b;">Key Experience:</p>
+        <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1e293b;">Recent work:</p>
         
         <div style="margin: 0 0 10px 0;">
-          <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">AWS RAG Systems</span>
-          <span style="font-size: 14px; color: #334155;">Multi-tenant backend, PostgreSQL + PGVector, ECS autoscaling → <strong style="color: #059669;">30% faster</strong></span>
+          <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">RAG Backend</span>
+          <span style="font-size: 14px; color: #334155;">Built multi-tenant system on AWS (PostgreSQL + PGVector, ECS) → cut latency <strong style="color: #059669;">30%</strong></span>
         </div>
         
         <div style="margin: 0 0 10px 0;">
           <span style="display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">Founding Engineer</span>
-          <span style="font-size: 14px; color: #334155;">AI forensics startup → architected platform, led team, built <strong>20+ APIs</strong>, enterprise NextJS UIs</span>
+          <span style="font-size: 14px; color: #334155;">Architected AI forensics platform, managed team, shipped <strong>20+ APIs</strong> and enterprise NextJS interfaces</span>
         </div>
         
         <div style="margin: 0 0 10px 0;">
-          <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">High-Impact Work</span>
-          <span style="font-size: 14px; color: #334155;">Crypto forensics → <strong style="color: #059669;">70% faster</strong> processing, 2B+ records, $20M+ cases</span>
+          <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">High-Stakes Work</span>
+          <span style="font-size: 14px; color: #334155;">Crypto forensics for $20M+ cases → <strong style="color: #059669;">70% faster</strong> processing, 2B+ records</span>
         </div>
         
-        <div style="margin: 0 0 10px 0;">
-          <span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">Tech Stack</span>
-          <span style="font-size: 14px; color: #334155;">Python • TypeScript • NextJS • React • PostgreSQL • MongoDB • Redis • Docker • AWS • Azure</span>
-        </div>
-
         <div style="margin: 0;">
-          <span style="display: inline-block; background: #fce7f3; color: #831843; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">Patent</span>
-          <span style="font-size: 14px; color: #334155;">Granted patent on blockchain medical logistics</span>
+          <span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">Stack</span>
+          <span style="font-size: 14px; color: #334155;">Python • TypeScript • React • NextJS • PostgreSQL • MongoDB • Redis • Docker • AWS</span>
         </div>
       </div>
 
       <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.5;">
-        <strong style="color: #059669;">✓ US work authorized</strong> • <strong style="color: #059669;">✓ Available May 2026</strong><br/>
-        Resume attached. Happy to discuss on a <strong>15-min call</strong> this week.
+        <strong style="color: #059669;">✓ US work authorized</strong> • <strong style="color: #059669;">✓ May 2026 start</strong><br/>
+        Resume attached. Happy to chat if you think there's a fit—my calendar is pretty open this week.
       </p>
 
-      <p style="margin: 0 0 20px 0; font-size: 15px; font-weight: 600; color: #2563eb;">
-        What's the best next step in your process?
+      <p style="margin: 0 0 20px 0; font-size: 15px; color: #1e293b;">
+        Thanks for your time.
       </p>
 
       <div style="margin: 24px 0 0 0; padding-top: 16px; border-top: 2px solid #e2e8f0;">
