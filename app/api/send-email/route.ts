@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
 import { buildEmailTemplate } from "@/templates/emailTemplate";
+import { buildRecruiterTemplate } from "@/templates/recruiterTemplate";
 import { UNIVERSITY_NAME } from "@/lib/constants";
 import { RESUME_NAME } from "@/lib/constants";
 import { PrismaClient } from "@/app/generated/prisma";
@@ -14,9 +15,19 @@ const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { email, name, company, jobPosition, isAlum } = body;
+  const {
+    email,
+    name,
+    company,
+    jobPosition,
+    isAlum,
+    isRecruiter,
+    tenureYears,
+    personalMention,
+  } = body; // Get new fields
   console.log(body);
 
+  // Insert company and recipient data
   const companyId = await upsertCompany({ companyName: company });
   const recipientId = await upsertRecipient({
     email,
@@ -39,19 +50,36 @@ export async function POST(req: NextRequest) {
   const resumePath = path.join(process.cwd(), "public", "resume.pdf");
   const resumeFile = fs.readFileSync(resumePath);
 
-  const html_body = isAlum
-    ? buildAlumTemplate({
-        name,
-        jobPosition,
-        company,
-        university: UNIVERSITY_NAME,
-      })
-    : buildEmailTemplate({ name, jobPosition, company });
+  // Decide which template to use based on whether they are an alum or not
+  let html_body;
+  if (isRecruiter) {
+    html_body = buildRecruiterTemplate({
+      name,
+      jobPosition,
+      company,
+    });
+  } else if (isAlum) {
+    html_body = buildAlumTemplate({
+      name,
+      jobPosition,
+      company,
+      university: UNIVERSITY_NAME,
+    });
+  } else {
+    html_body = buildEmailTemplate({
+      name,
+      jobPosition,
+      company,
+      tenureYears,
+      personalMention,
+    });
+  }
 
+  // Mail options, including attachments
   const mailOptions = {
     from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
     to: email,
-    subject: `Seeking Your Advice on ${jobPosition} Position at ${company}`,
+    subject: `Seeking to Learn From Your Journey to ${company}`,
     html: html_body,
     attachments: [
       {
@@ -61,20 +89,21 @@ export async function POST(req: NextRequest) {
       },
     ],
   };
+
   try {
     await transporter.sendMail(mailOptions);
     console.log("Sent");
     await updateEmailStatus({ emailLogId, status: "SENT" });
     return NextResponse.json(
       { message: "Email Sent Successfully!" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     console.error(err);
     await updateEmailStatus({ emailLogId, status: "FAILED" });
     return NextResponse.json(
       { error: "Failed to send email" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

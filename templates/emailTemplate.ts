@@ -10,33 +10,45 @@ type EmailTemplateParams = {
   name: string;
   jobPosition: string;
   company: string;
+  tenureYears?: number;
+  personalMention?: string;
 };
 
 export function buildEmailTemplate({
   name,
   jobPosition,
   company,
+  tenureYears,
+  personalMention,
 }: EmailTemplateParams) {
+  const mentionText = personalMention
+    ? `I came across your profile while researching software roles at ${company}, and your experience stood out to me. ${personalMention}`
+    : `I came across your profile while researching software roles at ${company}, and your experience stood out to me.`;
+
+  const tenureText = tenureYears
+    ? `Thank you for your time, and congratulations on completing ${tenureYears}+ years at ${company}.`
+    : `Thank you for your time.`;
+
   return `
     <div>
       <p>Hi ${name},</p>
 
-      <p>I hope you're doing well.</p>
-
       <p>
-        I came across the <strong>${jobPosition}</strong> position at <strong>${company}</strong> and believe it aligns perfectly with my skills and experience.
-        I'm highly interested in applying for this role.
+        I’m pursuing my Master’s in Computer Science at University of Massachusetts Amherst. I was researching about ${company} and your profile caught my attention.
       </p>
 
       <p>
-        Could you share any insights or advice about the role and the team?
-        I've attached my resume for your reference and would appreciate it if you could forward it to the hiring team.
+        Would you be open to a <strong>10–12 minute chat</strong>? I have <strong>three focused questions</strong> about what makes a strong engineer and your advice for early-career professionals.
       </p>
 
-      <p>Thank you for your time and assistance.</p>
+      <p>
+        If it’s easier, here’s my <a href="https://calendly.com/jeetsharma2112/30min" target="_blank">Calendly link</a>, but I’d be happy to work around your schedule. Either way, I admire the work you’re doing at ${company}.
+      </p>
+
+      <p>${tenureText}</p>
 
       <p>
-        Best regards,<br/>
+        Best,<br/>
         ${YOUR_NAME}<br/>
         ${CONTACT_NUMBER}<br/>
         <a href="${LINKEDIN_URL}" target="_blank">LinkedIn</a> |
