@@ -10,6 +10,11 @@ import {
   FaGraduationCap,
   FaBuilding,
   FaEnvelope,
+  FaExclamationTriangle,
+  FaStickyNote,
+  FaReply,
+  FaBell,
+  FaEdit,
 } from "react-icons/fa";
 
 type EmailLog = {
@@ -22,6 +27,16 @@ type EmailLog = {
   companyName: string;
   isAlumni: boolean;
   errorMessage: string | null;
+  templateUsed: string | null;
+  isMarkedWrong: boolean;
+  markedAt: string | null;
+  notes: string | null;
+  responseReceived: boolean;
+  responseDate: string | null;
+  responseType: string | null;
+  followUpScheduled: string | null;
+  followUpCount: number;
+  lastFollowUpDate: string | null;
 };
 
 export default function EmailHistoryPage() {
@@ -34,7 +49,13 @@ export default function EmailHistoryPage() {
     sent: 0,
     failed: 0,
     pending: 0,
+    markedWrong: 0,
+    responses: 0,
+    needsFollowUp: 0,
   });
+  const [selectedEmail, setSelectedEmail] = useState<EmailLog | null>(null);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [editingNotes, setEditingNotes] = useState("");
 
   useEffect(() => {
     fetchEmailLogs();
@@ -62,8 +83,27 @@ export default function EmailHistoryPage() {
       const pending = data.filter(
         (log: EmailLog) => log.status === "PENDING",
       ).length;
+      const markedWrong = data.filter(
+        (log: EmailLog) => log.isMarkedWrong,
+      ).length;
+      const responses = data.filter(
+        (log: EmailLog) => log.responseReceived,
+      ).length;
+      const needsFollowUp = data.filter(
+        (log: EmailLog) =>
+          log.followUpScheduled &&
+          new Date(log.followUpScheduled) <= new Date(),
+      ).length;
 
-      setStats({ total, sent, failed, pending });
+      setStats({
+        total,
+        sent,
+        failed,
+        pending,
+        markedWrong,
+        responses,
+        needsFollowUp,
+      });
     } catch (error) {
       console.error("Error fetching email logs:", error);
     } finally {
@@ -81,6 +121,65 @@ export default function EmailHistoryPage() {
         return <FaClock className="text-yellow-600" />;
       default:
         return <FaClock className="text-gray-600" />;
+    }
+  };
+
+  const handleMarkWrong = async (
+    emailLogId: string,
+    currentStatus: boolean,
+  ) => {
+    try {
+      await fetch("/api/update-email-log", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailLogId,
+          isMarkedWrong: !currentStatus,
+        }),
+      });
+      fetchEmailLogs();
+    } catch (error) {
+      console.error("Error marking email:", error);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedEmail) return;
+    try {
+      await fetch("/api/update-email-log", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailLogId: selectedEmail.id,
+          notes: editingNotes,
+        }),
+      });
+      setShowNotesModal(false);
+      setSelectedEmail(null);
+      setEditingNotes("");
+      fetchEmailLogs();
+    } catch (error) {
+      console.error("Error saving notes:", error);
+    }
+  };
+
+  const handleToggleResponse = async (
+    emailLogId: string,
+    currentStatus: boolean,
+  ) => {
+    try {
+      await fetch("/api/update-email-log", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailLogId,
+          responseReceived: !currentStatus,
+          responseDate: !currentStatus ? new Date().toISOString() : null,
+        }),
+      });
+      fetchEmailLogs();
+    } catch (error) {
+      console.error("Error updating response:", error);
     }
   };
 
@@ -116,11 +215,11 @@ export default function EmailHistoryPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Emails</p>
+                <p className="text-sm text-gray-600">Total</p>
                 <p className="text-2xl font-bold text-gray-800">
                   {stats.total}
                 </p>
@@ -159,6 +258,39 @@ export default function EmailHistoryPage() {
                 </p>
               </div>
               <FaClock className="text-3xl text-yellow-400" />
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Marked</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {stats.markedWrong}
+                </p>
+              </div>
+              <FaExclamationTriangle className="text-3xl text-orange-400" />
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-blue-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Responses</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {stats.responses}
+                </p>
+              </div>
+              <FaReply className="text-3xl text-blue-400" />
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-purple-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Follow-up</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {stats.needsFollowUp}
+                </p>
+              </div>
+              <FaBell className="text-3xl text-purple-400" />
             </div>
           </div>
         </div>
@@ -233,7 +365,13 @@ export default function EmailHistoryPage() {
                       Position
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      Template
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Sent At
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -277,8 +415,79 @@ export default function EmailHistoryPage() {
                       <td className="px-4 py-4 text-gray-800">
                         {log.jobPosition}
                       </td>
+                      <td className="px-4 py-4">
+                        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                          {log.templateUsed || "N/A"}
+                        </span>
+                      </td>
                       <td className="px-4 py-4 text-gray-600 text-sm">
-                        {new Date(log.sentAt).toLocaleString()}
+                        <div className="flex flex-col gap-1">
+                          <span>{new Date(log.sentAt).toLocaleString()}</span>
+                          {log.isMarkedWrong && (
+                            <span className="flex items-center gap-1 text-xs text-orange-600">
+                              <FaExclamationTriangle /> Marked Wrong
+                            </span>
+                          )}
+                          {log.responseReceived && (
+                            <span className="flex items-center gap-1 text-xs text-blue-600">
+                              <FaReply /> Response Received
+                            </span>
+                          )}
+                          {log.notes && (
+                            <span className="flex items-center gap-1 text-xs text-gray-600">
+                              <FaStickyNote /> Has Notes
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() =>
+                              handleMarkWrong(log.id, log.isMarkedWrong)
+                            }
+                            className={`p-2 rounded transition ${
+                              log.isMarkedWrong
+                                ? "bg-orange-100 text-orange-600 hover:bg-orange-200"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                            title={
+                              log.isMarkedWrong
+                                ? "Unmark as wrong"
+                                : "Mark as wrong"
+                            }
+                          >
+                            <FaExclamationTriangle />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedEmail(log);
+                              setEditingNotes(log.notes || "");
+                              setShowNotesModal(true);
+                            }}
+                            className="p-2 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+                            title="Add/Edit notes"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleToggleResponse(log.id, log.responseReceived)
+                            }
+                            className={`p-2 rounded transition ${
+                              log.responseReceived
+                                ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                            title={
+                              log.responseReceived
+                                ? "Mark no response"
+                                : "Mark response received"
+                            }
+                          >
+                            <FaReply />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -287,6 +496,60 @@ export default function EmailHistoryPage() {
             </div>
           )}
         </div>
+
+        {/* Notes Modal */}
+        {showNotesModal && selectedEmail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Edit Notes
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowNotesModal(false);
+                    setSelectedEmail(null);
+                    setEditingNotes("");
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <FaTimesCircle className="text-xl" />
+                </button>
+              </div>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  <strong>{selectedEmail.recipientName}</strong> at{" "}
+                  <strong>{selectedEmail.companyName}</strong>
+                </p>
+                <textarea
+                  value={editingNotes}
+                  onChange={(e) => setEditingNotes(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  rows={5}
+                  placeholder="Add notes about this email (e.g., wrong person, typo in subject, test email, etc.)"
+                />
+              </div>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowNotesModal(false);
+                    setSelectedEmail(null);
+                    setEditingNotes("");
+                  }}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-gray-700 font-medium transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveNotes}
+                  className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-md text-white font-medium transition"
+                >
+                  Save Notes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -27,6 +27,14 @@ export async function POST(req: NextRequest) {
   } = body; // Get new fields
   console.log(body);
 
+  // Determine template type
+  let templateUsed = "GENERIC";
+  if (isRecruiter) {
+    templateUsed = "RECRUITER";
+  } else if (isAlum) {
+    templateUsed = "ALUMNI";
+  }
+
   // Insert company and recipient data
   const companyId = await upsertCompany({ companyName: company });
   const recipientId = await upsertRecipient({
@@ -38,6 +46,7 @@ export async function POST(req: NextRequest) {
   const emailLogId = await insertEmailLog({
     recipientId,
     jobPosition,
+    templateUsed,
   });
 
   const transporter = nodemailer.createTransport({

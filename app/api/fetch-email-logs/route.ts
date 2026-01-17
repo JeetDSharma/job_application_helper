@@ -46,6 +46,16 @@ export async function GET(req: NextRequest) {
       companyName: log.recipient.company.companyName,
       isAlumni: log.recipient.isAlumni,
       errorMessage: log.errorMessage,
+      templateUsed: log.templateUsed,
+      isMarkedWrong: log.isMarkedWrong,
+      markedAt: log.markedAt,
+      notes: log.notes,
+      responseReceived: log.responseReceived,
+      responseDate: log.responseDate,
+      responseType: log.responseType,
+      followUpScheduled: log.followUpScheduled,
+      followUpCount: log.followUpCount,
+      lastFollowUpDate: log.lastFollowUpDate,
     }));
 
     return NextResponse.json(formattedLogs, { status: 200 });

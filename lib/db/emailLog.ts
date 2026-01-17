@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 type InsertEmailLog = {
   recipientId: string;
   jobPosition: string;
+  templateUsed?: string;
 };
 
 type UpdateEmailStatus = {
@@ -13,11 +14,13 @@ type UpdateEmailStatus = {
 export async function insertEmailLog({
   recipientId,
   jobPosition,
+  templateUsed,
 }: InsertEmailLog): Promise<string> {
   const response = await prisma.emailLog.create({
     data: {
       recipientId,
       jobPosition,
+      templateUsed,
     },
     select: {
       id: true,
