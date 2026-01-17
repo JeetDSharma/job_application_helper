@@ -22,31 +22,29 @@ export function buildRecruiterTemplate({
       <p style="margin: 0 0 16px 0; font-size: 15px;">Hi ${name},</p>
 
       <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.5;">
-        I saw the <strong style="color: #2563eb;">${jobPosition}</strong> role at ${company}. I've spent the last 2+ years building and owning production backend and full-stack systems that closely match this role. I'm graduating <strong>May 2026</strong> from UMass Amherst (MSCS, GPA 3.86) and can start immediately after.
+        I saw the <strong style="color: #2563eb;">${jobPosition}</strong> role at ${company}. I've spent the last 2+ years building and owning production backend and full-stack systems as a founding engineer. I'm graduating <strong>May 2026</strong> from UMass Amherst (MSCS, GPA 3.86) and can start immediately after.
       </p>
 
       <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 16px 20px; margin: 0 0 20px 0; border-radius: 4px;">
-        <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1e293b;">Recent work:</p>
+        <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1e293b;">Selected relevant work:</p>
         
-        <div style="margin: 0 0 10px 0;">
-          <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">RAG Backend</span>
-          <span style="font-size: 14px; color: #334155;">Built multi-tenant system on AWS (PostgreSQL + PGVector, ECS) → cut latency <strong style="color: #059669;">30%</strong></span>
-        </div>
-        
-        <div style="margin: 0 0 10px 0;">
-          <span style="display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">Founding Engineer</span>
-          <span style="font-size: 14px; color: #334155;">Architected AI forensics platform, managed team, shipped <strong>20+ APIs</strong> and enterprise NextJS interfaces</span>
-        </div>
-        
-        <div style="margin: 0 0 10px 0;">
-          <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">High-Stakes Work</span>
-          <span style="font-size: 14px; color: #334155;">Crypto forensics for $20M+ cases → <strong style="color: #059669;">70% faster</strong> processing, 2B+ records</span>
-        </div>
-        
-        <div style="margin: 0;">
-          <span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; margin-right: 6px;">Stack</span>
-          <span style="font-size: 14px; color: #334155;">Python • TypeScript • React • NextJS • PostgreSQL • MongoDB • Redis • Docker • AWS</span>
-        </div>
+        <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+          <li style="margin: 0 0 8px 0; font-size: 14px; color: #334155; line-height: 1.5;">
+            <strong style="color: #1e293b;">Ownership & architecture:</strong> Founding engineer — architected AI forensics platform, led core system design, shipped <strong style="color: #059669;">20+ production APIs</strong>
+          </li>
+          
+          <li style="margin: 0 0 8px 0; font-size: 14px; color: #334155; line-height: 1.5;">
+            <strong style="color: #1e293b;">Backend @ scale:</strong> Built multi-tenant AWS backend (PostgreSQL + PGVector, ECS autoscaling) → <strong style="color: #059669;">30% lower latency</strong>
+          </li>
+          
+          <li style="margin: 0 0 8px 0; font-size: 14px; color: #334155; line-height: 1.5;">
+            <strong style="color: #1e293b;">High-stakes data:</strong> Crypto forensics pipelines over 2B+ records supporting $20M+ cases → <strong style="color: #059669;">70% faster</strong> analysis
+          </li>
+          
+          <li style="margin: 0; font-size: 14px; color: #334155; line-height: 1.5;">
+            <strong style="color: #1e293b;">Stack match:</strong> Python, TypeScript, React/NextJS, PostgreSQL, MongoDB, Redis, Docker, AWS
+          </li>
+        </ul>
       </div>
 
       <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.5;">
