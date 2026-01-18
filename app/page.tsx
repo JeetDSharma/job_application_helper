@@ -17,8 +17,10 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaHistory,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
+import ScheduleModal from "@/components/ScheduleModal";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
 import { buildEmailTemplate } from "@/templates/emailTemplateNew";
 import { buildRecruiterTemplate } from "@/templates/recruiterTemplate";
@@ -42,6 +44,7 @@ export default function Home() {
     emailHtml: "",
     emailSubject: "",
   });
+  const [scheduleModal, setScheduleModal] = useState(false);
   const [recipientCheck, setRecipientCheck] = useState<{
     exists: boolean;
     loading: boolean;
@@ -306,6 +309,60 @@ export default function Home() {
     });
   };
 
+  const handleScheduleEmail = async (scheduledTime: Date) => {
+    try {
+      const response = await fetch("/api/schedule-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...emailForm,
+          scheduledFor: scheduledTime.toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(
+          `Email scheduled for ${scheduledTime.toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          })}!`,
+          { duration: 5000 },
+        );
+        setEmailForm({
+          email: emailForm.email,
+          name: emailForm.name,
+          company: emailForm.company,
+          jobPosition: emailForm.jobPosition,
+          isAlum: emailForm.isAlum,
+          isRecruiter: emailForm.isRecruiter,
+          tenureYears: "",
+          personalMention: "",
+        });
+        setFormErrors({
+          email: "",
+          name: "",
+          company: "",
+          jobPosition: "",
+        });
+        setTouched({
+          email: false,
+          name: false,
+          company: false,
+          jobPosition: false,
+        });
+      } else {
+        toast.error(data.error || "Failed to schedule email");
+      }
+    } catch (error) {
+      console.error("Schedule email error:", error);
+      toast.error("Failed to schedule email");
+    }
+  };
+
   const handleCopyLinkedInMessage = () => {
     const name = emailForm.name || "there";
     const company = emailForm.company || "your company";
@@ -343,6 +400,15 @@ export default function Home() {
         emailHtml={previewModal.emailHtml}
         emailSubject={previewModal.emailSubject}
         recipientEmail={emailForm.email}
+      />
+      <ScheduleModal
+        isOpen={scheduleModal}
+        onClose={() => setScheduleModal(false)}
+        onSchedule={handleScheduleEmail}
+        recipientType={{
+          isRecruiter: emailForm.isRecruiter,
+          isAlum: emailForm.isAlum,
+        }}
       />
       <div className="min-h-screen flex justify-center items-center bg-gray-100">
         <div className="bg-white p-8 shadow-md rounded-lg w-lg">
@@ -600,37 +666,53 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-2">
-              <button
-                type="button"
-                onClick={generateEmailPreview}
-                disabled={!isFormValid()}
-                className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
-                  isFormValid()
-                    ? "border-gray-300 bg-white hover:bg-gray-50 text-gray-700 cursor-pointer"
-                    : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
-                }`}
-              >
-                <FaEye /> Preview
-              </button>
-              <button
-                type="submit"
-                disabled={!isFormValid() || isPending}
-                className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
-                  isFormValid() && !isPending
-                    ? "border-indigo-600 bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
-                    : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                <FaPaperPlane /> Send Email
-              </button>
-              <button
-                type="button"
-                onClick={handleCopyLinkedInMessage}
-                className="flex-1 flex items-center justify-center gap-2 border border-blue-600 rounded-md px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium transition shadow-sm cursor-pointer"
-              >
-                <FaLinkedin /> LinkedIn
-              </button>
+            <div className="flex flex-col gap-3 mt-2">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={generateEmailPreview}
+                  disabled={!isFormValid()}
+                  className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                    isFormValid()
+                      ? "border-gray-300 bg-white hover:bg-gray-50 text-gray-700 cursor-pointer"
+                      : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  <FaEye /> Preview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScheduleModal(true)}
+                  disabled={!isFormValid()}
+                  className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                    isFormValid()
+                      ? "border-green-600 bg-green-500 hover:bg-green-600 text-white cursor-pointer"
+                      : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <FaCalendarAlt /> Schedule
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="submit"
+                  disabled={!isFormValid() || isPending}
+                  className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                    isFormValid() && !isPending
+                      ? "border-indigo-600 bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
+                      : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <FaPaperPlane /> Send Now
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyLinkedInMessage}
+                  className="flex-1 flex items-center justify-center gap-2 border border-blue-600 rounded-md px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium transition shadow-sm cursor-pointer"
+                >
+                  <FaLinkedin /> LinkedIn
+                </button>
+              </div>
             </div>
           </form>
         </div>

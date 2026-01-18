@@ -48,3 +48,23 @@ model EmailLog {
   followUpCount     Int       @default(0)
   lastFollowUpDate  DateTime?
 }
+
+model ScheduledEmail {
+  id              String    @id @default(uuid())
+  email           String
+  name            String
+  company         String
+  jobPosition     String
+  isAlum          Boolean   @default(false)
+  isRecruiter     Boolean   @default(false)
+  tenureYears     String?
+  personalMention String?
+  scheduledFor    DateTime
+  status          String    @default("SCHEDULED")
+  createdAt       DateTime  @default(now())
+  processedAt     DateTime?
+  errorMessage    String?
+
+  @@index([scheduledFor, status])
+  @@index([status])
+}
