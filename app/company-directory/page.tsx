@@ -14,7 +14,7 @@ type CompanyStatsInput = {
   recipientCount: number;
 };
 
-export function CompanyDirectory() {
+export default function CompanyDirectory() {
   const [companyData, setCompanyData] = useState<CompanyTableInput[]>([]);
   const [companyStats, setCompanyStats] = useState<CompanyStatsInput>({
     companyCount: 0,
@@ -73,5 +73,3 @@ export function CompanyDirectory() {
     </div>
   );
 }
-
-export default CompanyDirectory;
