@@ -13,10 +13,11 @@ import {
   FaLinkedin,
   FaEye,
   FaExclamationTriangle,
-  FaClock,
+  FaEnvelopeOpen,
   FaCheckCircle,
   FaTimesCircle,
   FaHistory,
+  FaClock,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
@@ -32,8 +33,8 @@ export default function Home() {
     jobPosition: "",
     isAlum: false,
     isRecruiter: false,
-    tenureYears: "", // New field for tenure
-    personalMention: "", // New field for personal mention
+    tenureYears: "",
+    personalMention: "",
   });
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -95,6 +96,14 @@ export default function Home() {
     return (
       emailForm.email.trim() !== "" &&
       validateEmail(emailForm.email) === "" &&
+      emailForm.name.trim() !== "" &&
+      emailForm.company.trim() !== "" &&
+      emailForm.jobPosition.trim() !== ""
+    );
+  };
+
+  const isLinkedInFormValid = (): boolean => {
+    return (
       emailForm.name.trim() !== "" &&
       emailForm.company.trim() !== "" &&
       emailForm.jobPosition.trim() !== ""
@@ -306,6 +315,32 @@ export default function Home() {
     });
   };
 
+  const handleCopyEmailForInMail = () => {
+    const { name, jobPosition, company, personalMention } = emailForm;
+
+    const inMailContent = `Hi ${name},
+
+I hope this message finds you well! I recently came across the ${jobPosition} position at ${company} and was excited to see how my experience aligns with the role. As a founding engineer, I've designed and deployed backend and distributed systems for AI-driven platforms, which I believe would contribute significantly to the innovative work you're doing at ${company}.
+
+I'm particularly impressed by ${company}'s mission${personalMention ? ` and ${personalMention.toLowerCase()}` : " to help emerging tech companies find the talent they need for growth"}. I'm eager to be a part of a team that is shaping the future of technology.
+
+Could you please let me know if there are current openings that match my background?
+
+Thank you, and I look forward to your response!
+
+Best regards,
+Jeet Sharma`;
+
+    navigator.clipboard
+      .writeText(inMailContent)
+      .then(() => {
+        toast.success("LinkedIn InMail content copied!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy InMail content.");
+      });
+  };
+
   const handleCopyLinkedInMessage = () => {
     const name = emailForm.name || "there";
     const company = emailForm.company || "your company";
@@ -314,13 +349,10 @@ export default function Home() {
     let linkedInMessage = "";
 
     if (emailForm.isRecruiter) {
-      // Recruiter-specific message: Direct, value-first, clear ask
       linkedInMessage = `Hi ${name},\n\nI'm a founding engineer with 2+ years building and owning production backend and full-stack systems. Graduating May 2026 from UMass Amherst (MSCS). Saw the ${jobPosition} role at ${company}. Open to a quick chat this week if you think there's a fit.`;
     } else if (emailForm.isAlum) {
-      // Alumni message: Shared background, authentic networking
       linkedInMessage = `Hi ${name},\n\nJeet here, MSCS at UMass Amherst (May 2026). Great to see a fellow alum at ${company}. I've spent 2+ years as a founding engineer shipping production systems and I'm exploring roles now. Would love 10 minutes of your time to hear about your experience there and what helped you succeed.`;
     } else {
-      // Non-alum engineer message: Respect their expertise, targeted question
       linkedInMessage = `Hi ${name},\n\nJeet, MSCS at UMass Amherst (May 2026). I've been building production systems as a founding engineer for 2+ years and I'm exploring roles at ${company}. From your experience, what's the single most important signal your team looks for when evaluating engineers? Even one insight would help me focus my prep.`;
     }
 
@@ -600,37 +632,58 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-2">
-              <button
-                type="button"
-                onClick={generateEmailPreview}
-                disabled={!isFormValid()}
-                className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
-                  isFormValid()
-                    ? "border-gray-300 bg-white hover:bg-gray-50 text-gray-700 cursor-pointer"
-                    : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
-                }`}
-              >
-                <FaEye /> Preview
-              </button>
-              <button
-                type="submit"
-                disabled={!isFormValid() || isPending}
-                className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
-                  isFormValid() && !isPending
-                    ? "border-indigo-600 bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
-                    : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                <FaPaperPlane /> Send Email
-              </button>
-              <button
-                type="button"
-                onClick={handleCopyLinkedInMessage}
-                className="flex-1 flex items-center justify-center gap-2 border border-blue-600 rounded-md px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium transition shadow-sm cursor-pointer"
-              >
-                <FaLinkedin /> LinkedIn
-              </button>
+            <div className="flex flex-col gap-3 mt-2">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={generateEmailPreview}
+                  disabled={!isFormValid()}
+                  className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                    isFormValid()
+                      ? "border-gray-300 bg-white hover:bg-gray-50 text-gray-700 cursor-pointer"
+                      : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  <FaEye /> Preview
+                </button>
+                <button
+                  type="submit"
+                  disabled={!isFormValid() || isPending}
+                  className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                    isFormValid() && !isPending
+                      ? "border-indigo-600 bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
+                      : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <FaPaperPlane /> Send Email
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={handleCopyLinkedInMessage}
+                  disabled={!isLinkedInFormValid()}
+                  className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                    isLinkedInFormValid()
+                      ? "border-blue-600 bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
+                      : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <FaLinkedin /> LinkedIn Message
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyEmailForInMail}
+                  disabled={!isLinkedInFormValid()}
+                  className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                    isLinkedInFormValid()
+                      ? "border-purple-600 bg-purple-500 hover:bg-purple-600 text-white cursor-pointer"
+                      : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <FaEnvelopeOpen /> InMail Email
+                </button>
+              </div>
             </div>
           </form>
         </div>

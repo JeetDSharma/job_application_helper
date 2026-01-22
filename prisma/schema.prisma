@@ -30,21 +30,20 @@ model Recipient {
 }
 
 model EmailLog {
-  id                String    @id @default(uuid())
-  sentAt            DateTime  @default(now())
-  recipient         Recipient @relation(fields: [recipientId], references: [id])
-  recipientId       String
-  status            String    @default("PENDING")
-  jobPosition       String
-  errorMessage      String?
-  templateUsed      String?
-  isMarkedWrong     Boolean   @default(false)
-  markedAt          DateTime?
-  notes             String?
-  responseReceived  Boolean   @default(false)
-  responseDate      DateTime?
-  responseType      String?
-  followUpScheduled DateTime?
-  followUpCount     Int       @default(0)
-  lastFollowUpDate  DateTime?
+  id               String    @id @default(uuid())
+  sentAt           DateTime  @default(now())
+  recipient        Recipient @relation(fields: [recipientId], references: [id])
+  recipientId      String
+  status           String    @default("PENDING")
+  jobPosition      String
+  errorMessage     String?
+  templateUsed     String?
+  isMarkedWrong    Boolean   @default(false)
+  markedAt         DateTime?
+  notes            String?
+  responseReceived Boolean   @default(false)
+  responseDate     DateTime?
+  responseType     String?
+  followUpCount    Int       @default(0)
+  lastFollowUpDate DateTime?
 }
