@@ -27,6 +27,173 @@ import { buildEmailTemplate } from "@/templates/emailTemplateNew";
 import { buildRecruiterTemplate } from "@/templates/recruiterTemplate";
 import { UNIVERSITY_NAME } from "@/lib/constants";
 
+type TimePreset = {
+  label: string;
+  date: string;
+  time: string;
+  description: string;
+};
+
+function getOptimalTimePresets(): TimePreset[] {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentDay = now.getDay();
+  const presets: TimePreset[] = [];
+
+  const getNextWeekday = (targetDay: number): Date => {
+    const result = new Date(now);
+    result.setHours(0, 0, 0, 0);
+    const daysUntilTarget = (targetDay + 7 - result.getDay()) % 7;
+    result.setDate(result.getDate() + (daysUntilTarget || 7));
+    return result;
+  };
+
+  const formatDate = (date: Date): string => date.toISOString().split("T")[0];
+
+  if (currentDay === 0 || currentDay === 6) {
+    const nextTuesday = getNextWeekday(2);
+    nextTuesday.setHours(10, 0, 0, 0);
+    presets.push({
+      label: "Next Tuesday 10 AM",
+      date: formatDate(nextTuesday),
+      time: "10:00",
+      description: "Best day & time for responses",
+    });
+
+    const nextWednesday = getNextWeekday(3);
+    nextWednesday.setHours(10, 0, 0, 0);
+    presets.push({
+      label: "Next Wednesday 10 AM",
+      date: formatDate(nextWednesday),
+      time: "10:00",
+      description: "Peak engagement time",
+    });
+  } else if (currentHour >= 16) {
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(10, 0, 0, 0);
+
+    if (tomorrow.getDay() === 6) {
+      const nextMonday = new Date(tomorrow);
+      nextMonday.setDate(nextMonday.getDate() + 2);
+      presets.push({
+        label: "Monday 10 AM",
+        date: formatDate(nextMonday),
+        time: "10:00",
+        description: "Start of week",
+      });
+    } else if (tomorrow.getDay() === 0) {
+      const nextMonday = new Date(tomorrow);
+      nextMonday.setDate(nextMonday.getDate() + 1);
+      presets.push({
+        label: "Monday 10 AM",
+        date: formatDate(nextMonday),
+        time: "10:00",
+        description: "Start of week",
+      });
+    } else {
+      presets.push({
+        label: "Tomorrow 10 AM",
+        date: formatDate(tomorrow),
+        time: "10:00",
+        description: "Morning priority",
+      });
+    }
+
+    const dayAfter = new Date(now);
+    dayAfter.setDate(dayAfter.getDate() + 2);
+    if (dayAfter.getDay() !== 0 && dayAfter.getDay() !== 6) {
+      dayAfter.setHours(10, 0, 0, 0);
+      const dayName = dayAfter.toLocaleDateString("en-US", {
+        weekday: "short",
+      });
+      presets.push({
+        label: `${dayName} 10 AM`,
+        date: formatDate(dayAfter),
+        time: "10:00",
+        description: "Optimal timing",
+      });
+    }
+  } else {
+    const today = new Date(now);
+    if (currentHour < 10) {
+      today.setHours(10, 0, 0, 0);
+      presets.push({
+        label: "Today 10 AM",
+        date: formatDate(today),
+        time: "10:00",
+        description: "Peak morning time",
+      });
+    }
+
+    if (currentHour < 14) {
+      today.setHours(14, 0, 0, 0);
+      presets.push({
+        label: "Today 2 PM",
+        date: formatDate(today),
+        time: "14:00",
+        description: "Post-lunch check",
+      });
+    }
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (tomorrow.getDay() === 6) {
+      const nextMonday = new Date(tomorrow);
+      nextMonday.setDate(nextMonday.getDate() + 2);
+      nextMonday.setHours(10, 0, 0, 0);
+      presets.push({
+        label: "Monday 10 AM",
+        date: formatDate(nextMonday),
+        time: "10:00",
+        description: "Start of week",
+      });
+    } else if (tomorrow.getDay() === 0) {
+      const nextMonday = new Date(tomorrow);
+      nextMonday.setDate(nextMonday.getDate() + 1);
+      nextMonday.setHours(10, 0, 0, 0);
+      presets.push({
+        label: "Monday 10 AM",
+        date: formatDate(nextMonday),
+        time: "10:00",
+        description: "Start of week",
+      });
+    } else {
+      tomorrow.setHours(10, 0, 0, 0);
+      presets.push({
+        label: "Tomorrow 10 AM",
+        date: formatDate(tomorrow),
+        time: "10:00",
+        description: "Morning priority",
+      });
+    }
+  }
+
+  const nextTuesday = getNextWeekday(2);
+  nextTuesday.setHours(10, 0, 0, 0);
+  if (!presets.some((p) => p.date === formatDate(nextTuesday))) {
+    presets.push({
+      label: "Next Tuesday 10 AM",
+      date: formatDate(nextTuesday),
+      time: "10:00",
+      description: "Best response rate",
+    });
+  }
+
+  const nextWednesday = getNextWeekday(3);
+  nextWednesday.setHours(14, 0, 0, 0);
+  if (!presets.some((p) => p.date === formatDate(nextWednesday))) {
+    presets.push({
+      label: "Next Wed 2 PM",
+      date: formatDate(nextWednesday),
+      time: "14:00",
+      description: "Mid-week optimal",
+    });
+  }
+
+  return presets.slice(0, 4);
+}
+
 export default function Home() {
   const [emailForm, setEmailForm] = useState({
     email: "",
@@ -821,6 +988,46 @@ Jeet Sharma`;
             </div>
 
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quick Presets
+                </label>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {getOptimalTimePresets().map((preset, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() =>
+                        setScheduleModal({
+                          ...scheduleModal,
+                          scheduledDate: preset.date,
+                          scheduledTime: preset.time,
+                        })
+                      }
+                      className="flex flex-col items-start p-3 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left group"
+                    >
+                      <span className="text-sm font-semibold text-gray-900 group-hover:text-blue-700">
+                        {preset.label}
+                      </span>
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        {preset.description}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-white text-gray-500">
+                    Or pick custom time
+                  </span>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Date
