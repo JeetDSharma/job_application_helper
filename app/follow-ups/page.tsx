@@ -12,6 +12,7 @@ import {
   FaCalendarAlt,
   FaEye,
   FaCopy,
+  FaCheck,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildFollowUpTemplate } from "@/templates/followUpTemplate";
@@ -43,7 +44,9 @@ function FollowUpCard({
   onSend,
   onPreview,
   onCopy,
+  onMarkSent,
   sendingId,
+  markingId,
   formatDate,
   getDaysUntil,
   urgency,
@@ -52,7 +55,9 @@ function FollowUpCard({
   onSend: (followUp: FollowUp) => void;
   onPreview: (followUp: FollowUp) => void;
   onCopy: (followUp: FollowUp) => void;
+  onMarkSent: (followUp: FollowUp) => void;
   sendingId: string | null;
+  markingId: string | null;
   formatDate: (date: string) => string;
   getDaysUntil: (date: string) => number;
   urgency: "overdue" | "today" | "normal";
@@ -109,35 +114,51 @@ function FollowUpCard({
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onPreview(followUp)}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-md text-gray-700 font-medium transition"
-          >
-            <FaEye /> Preview
-          </button>
-          <button
-            onClick={() => onCopy(followUp)}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-md text-gray-700 font-medium transition"
-          >
-            <FaCopy /> Copy
-          </button>
-          <button
-            onClick={() => onSend(followUp)}
-            disabled={sendingId === followUp.id}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md font-medium transition ${
-              sendingId === followUp.id
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : urgency === "overdue"
-                  ? "bg-red-600 text-white hover:bg-red-700"
-                  : urgency === "today"
-                    ? "bg-orange-600 text-white hover:bg-orange-700"
-                    : "bg-indigo-500 text-white hover:bg-indigo-600"
-            }`}
-          >
-            <FaPaperPlane />
-            {sendingId === followUp.id ? "Sending..." : "Send"}
-          </button>
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => onPreview(followUp)}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-md text-gray-700 font-medium transition"
+            >
+              <FaEye /> Preview
+            </button>
+            <button
+              onClick={() => onCopy(followUp)}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-md text-gray-700 font-medium transition"
+            >
+              <FaCopy /> Copy
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onMarkSent(followUp)}
+              disabled={markingId === followUp.id}
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md font-medium transition ${
+                markingId === followUp.id
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+            >
+              <FaCheck />
+              {markingId === followUp.id ? "Marking..." : "Mark as Sent"}
+            </button>
+            <button
+              onClick={() => onSend(followUp)}
+              disabled={sendingId === followUp.id}
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md font-medium transition ${
+                sendingId === followUp.id
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : urgency === "overdue"
+                    ? "bg-red-600 text-white hover:bg-red-700"
+                    : urgency === "today"
+                      ? "bg-orange-600 text-white hover:bg-orange-700"
+                      : "bg-indigo-500 text-white hover:bg-indigo-600"
+              }`}
+            >
+              <FaPaperPlane />
+              {sendingId === followUp.id ? "Sending..." : "Send"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -149,7 +170,9 @@ function FollowUpSections({
   onSend,
   onPreview,
   onCopy,
+  onMarkSent,
   sendingId,
+  markingId,
   formatDate,
   getDaysUntil,
 }: {
@@ -157,7 +180,9 @@ function FollowUpSections({
   onSend: (followUp: FollowUp) => void;
   onPreview: (followUp: FollowUp) => void;
   onCopy: (followUp: FollowUp) => void;
+  onMarkSent: (followUp: FollowUp) => void;
   sendingId: string | null;
+  markingId: string | null;
   formatDate: (date: string) => string;
   getDaysUntil: (date: string) => number;
 }) {
@@ -179,7 +204,9 @@ function FollowUpSections({
                 onSend={onSend}
                 onPreview={onPreview}
                 onCopy={onCopy}
+                onMarkSent={onMarkSent}
                 sendingId={sendingId}
+                markingId={markingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
                 urgency="overdue"
@@ -205,7 +232,9 @@ function FollowUpSections({
                 onSend={onSend}
                 onPreview={onPreview}
                 onCopy={onCopy}
+                onMarkSent={onMarkSent}
                 sendingId={sendingId}
+                markingId={markingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
                 urgency="today"
@@ -231,7 +260,9 @@ function FollowUpSections({
                 onSend={onSend}
                 onPreview={onPreview}
                 onCopy={onCopy}
+                onMarkSent={onMarkSent}
                 sendingId={sendingId}
+                markingId={markingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
                 urgency="normal"
@@ -257,7 +288,9 @@ function FollowUpSections({
                 onSend={onSend}
                 onPreview={onPreview}
                 onCopy={onCopy}
+                onMarkSent={onMarkSent}
                 sendingId={sendingId}
+                markingId={markingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
                 urgency="normal"
@@ -274,6 +307,7 @@ export default function FollowUps() {
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [markingId, setMarkingId] = useState<string | null>(null);
   const [previewModal, setPreviewModal] = useState({
     isOpen: false,
     emailHtml: "",
@@ -433,6 +467,33 @@ export default function FollowUps() {
       });
   };
 
+  const handleMarkSent = async (followUp: FollowUp) => {
+    setMarkingId(followUp.id);
+    try {
+      const response = await fetch("/api/mark-followup-sent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          emailLogId: followUp.id,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Follow-up marked as sent!");
+        setFollowUps(followUps.filter((f) => f.id !== followUp.id));
+      } else {
+        toast.error("Failed to mark follow-up as sent");
+      }
+    } catch (error) {
+      console.error("Error marking follow-up as sent:", error);
+      toast.error("Failed to mark follow-up as sent");
+    } finally {
+      setMarkingId(null);
+    }
+  };
+
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
@@ -476,7 +537,9 @@ export default function FollowUps() {
                 onSend={handleSendFollowUp}
                 onPreview={handlePreview}
                 onCopy={handleCopy}
+                onMarkSent={handleMarkSent}
                 sendingId={sendingId}
+                markingId={markingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
               />
