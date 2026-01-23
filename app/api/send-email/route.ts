@@ -11,7 +11,11 @@ import { RESUME_NAME } from "@/lib/constants";
 import { PrismaClient } from "@/app/generated/prisma";
 import { upsertCompany } from "@/lib/db/company";
 import { upsertRecipient } from "@/lib/db/recipient";
-import { insertEmailLog, updateEmailStatus } from "@/lib/db/emailLog";
+import {
+  insertEmailLog,
+  updateEmailStatus,
+  markFollowUpSent,
+} from "@/lib/db/emailLog";
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
@@ -47,10 +51,18 @@ export async function POST(req: NextRequest) {
     companyId,
     isAlumni: isAlum,
   });
+  // Calculate follow-up date (6 days from now) for initial emails
+  let followUpDate: Date | undefined = undefined;
+  if (!isFollowUp) {
+    followUpDate = new Date();
+    followUpDate.setDate(followUpDate.getDate() + 6);
+  }
+
   const emailLogId = await insertEmailLog({
     recipientId,
     jobPosition,
     templateUsed,
+    followUpScheduledFor: followUpDate,
   });
 
   const transporter = nodemailer.createTransport({
@@ -119,6 +131,27 @@ export async function POST(req: NextRequest) {
     await transporter.sendMail(mailOptions);
     console.log("Sent");
     await updateEmailStatus({ emailLogId, status: "SENT" });
+
+    // If this is a follow-up, mark the original email log
+    if (isFollowUp) {
+      const originalEmailLog = await prisma.emailLog.findFirst({
+        where: {
+          recipientId,
+          followUpScheduledFor: {
+            not: null,
+          },
+          responseReceived: false,
+        },
+        orderBy: {
+          sentAt: "desc",
+        },
+      });
+
+      if (originalEmailLog) {
+        await markFollowUpSent(originalEmailLog.id);
+      }
+    }
+
     return NextResponse.json(
       { message: "Email Sent Successfully!" },
       { status: 200 },

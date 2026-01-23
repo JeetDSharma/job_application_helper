@@ -18,6 +18,7 @@ import {
   FaTimesCircle,
   FaHistory,
   FaClock,
+  FaReply,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
@@ -380,12 +381,20 @@ Jeet Sharma`;
         <div className="bg-white p-8 shadow-md rounded-lg w-lg">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold">Send Email</h1>
-            <Link
-              href="/history"
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-md transition"
-            >
-              <FaHistory /> Email History
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/follow-ups"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-orange-600 hover:text-orange-800 hover:bg-orange-50 rounded-md transition"
+              >
+                <FaReply /> Follow-Ups
+              </Link>
+              <Link
+                href="/history"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-md transition"
+              >
+                <FaHistory /> Email History
+              </Link>
+            </div>
           </div>
 
           <form
