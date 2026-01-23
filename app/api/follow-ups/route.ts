@@ -5,8 +5,8 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // Get all follow-ups (not just due ones)
-    const allFollowUps = await prisma.emailLog.findMany({
+    // Get pending follow-ups (scheduled but not sent yet)
+    const pendingFollowUps = await prisma.emailLog.findMany({
       where: {
         followUpScheduledFor: {
           not: null,
@@ -26,7 +26,34 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ followUps: allFollowUps }, { status: 200 });
+    // Get sent follow-ups (where followUpCount > 0)
+    const sentFollowUps = await prisma.emailLog.findMany({
+      where: {
+        followUpCount: {
+          gt: 0,
+        },
+        responseReceived: false,
+        status: "SENT",
+      },
+      include: {
+        recipient: {
+          include: {
+            company: true,
+          },
+        },
+      },
+      orderBy: {
+        lastFollowUpDate: "desc",
+      },
+    });
+
+    return NextResponse.json(
+      {
+        pendingFollowUps,
+        sentFollowUps,
+      },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Error fetching follow-ups:", error);
     return NextResponse.json(

@@ -13,6 +13,10 @@ import {
   FaEye,
   FaCopy,
   FaCheck,
+  FaBuilding,
+  FaBriefcase,
+  FaHistory,
+  FaInbox,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildFollowUpTemplate } from "@/templates/followUpTemplate";
@@ -21,8 +25,9 @@ type FollowUp = {
   id: string;
   sentAt: string;
   jobPosition: string;
-  followUpScheduledFor: string;
+  followUpScheduledFor: string | null;
   followUpCount: number;
+  lastFollowUpDate: string | null;
   recipient: {
     name: string;
     email: string;
@@ -39,7 +44,7 @@ type CategorizedFollowUps = {
   later: FollowUp[];
 };
 
-function FollowUpCard({
+function PendingFollowUpCard({
   followUp,
   onSend,
   onPreview,
@@ -62,102 +67,188 @@ function FollowUpCard({
   getDaysUntil: (date: string) => number;
   urgency: "overdue" | "today" | "normal";
 }) {
-  const daysUntil = getDaysUntil(followUp.followUpScheduledFor);
-  const urgencyColors = {
-    overdue: "border-red-300 bg-red-50",
-    today: "border-orange-300 bg-orange-50",
-    normal: "border-gray-200 bg-white",
+  const daysUntil = followUp.followUpScheduledFor
+    ? getDaysUntil(followUp.followUpScheduledFor)
+    : 0;
+  const urgencyConfig = {
+    overdue: {
+      bg: "bg-white",
+      border: "border-l-4 border-red-600",
+      badge: "bg-red-600 text-white",
+      badgeText: `${Math.abs(daysUntil)} days overdue`,
+    },
+    today: {
+      bg: "bg-white",
+      border: "border-l-4 border-amber-500",
+      badge: "bg-amber-500 text-white",
+      badgeText: "Due Today",
+    },
+    normal: {
+      bg: "bg-white",
+      border: "border-l-4 border-slate-300",
+      badge: "bg-slate-700 text-white",
+      badgeText: daysUntil === 1 ? "Tomorrow" : `In ${daysUntil} days`,
+    },
   };
+
+  const config = urgencyConfig[urgency];
 
   return (
     <div
-      className={`border rounded-lg p-4 hover:shadow-md transition ${urgencyColors[urgency]}`}
+      className={`${config.bg} ${config.border} border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-slate-300 transition-all duration-200`}
     >
-      <div className="flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <FaEnvelope className="text-indigo-600 flex-shrink-0" />
-              <h3 className="font-semibold text-lg truncate">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <FaEnvelope className="text-slate-700 text-lg" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-lg text-slate-900 truncate">
+                  {followUp.recipient.name}
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
+                  {followUp.recipient.email}
+                </p>
+              </div>
+            </div>
+          </div>
+          <span
+            className={`${config.badge} px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap`}
+          >
+            {config.badgeText}
+          </span>
+        </div>
+
+        {/* Details */}
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="flex items-center gap-2 text-slate-700">
+            <FaBuilding className="text-slate-400 flex-shrink-0" />
+            <span className="truncate font-medium">
+              {followUp.recipient.company.companyName}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-700">
+            <FaBriefcase className="text-slate-400 flex-shrink-0" />
+            <span className="truncate font-medium">{followUp.jobPosition}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-600">
+            <FaCalendarAlt className="text-slate-400 flex-shrink-0" />
+            <span>Sent: {new Date(followUp.sentAt).toLocaleDateString()}</span>
+          </div>
+          {followUp.followUpScheduledFor && (
+            <div className="flex items-center gap-2 text-slate-600">
+              <FaClock className="text-slate-400 flex-shrink-0" />
+              <span>Due: {formatDate(followUp.followUpScheduledFor)}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-2 border-t border-slate-200">
+          <button
+            onClick={() => onPreview(followUp)}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 rounded-lg text-slate-700 font-medium transition-all"
+          >
+            <FaEye className="text-sm" />
+            <span className="text-sm">Preview</span>
+          </button>
+          <button
+            onClick={() => onCopy(followUp)}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 rounded-lg text-slate-700 font-medium transition-all"
+          >
+            <FaCopy className="text-sm" />
+            <span className="text-sm">Copy</span>
+          </button>
+          <button
+            onClick={() => onMarkSent(followUp)}
+            disabled={markingId === followUp.id}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all ${
+              markingId === followUp.id
+                ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                : "bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-md"
+            }`}
+          >
+            <FaCheck className="text-sm" />
+            <span className="text-sm">
+              {markingId === followUp.id ? "Marking..." : "Mark Sent"}
+            </span>
+          </button>
+          <button
+            onClick={() => onSend(followUp)}
+            disabled={sendingId === followUp.id}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all ${
+              sendingId === followUp.id
+                ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                : urgency === "overdue"
+                  ? "bg-red-600 text-white hover:bg-red-700 hover:shadow-md"
+                  : urgency === "today"
+                    ? "bg-amber-500 text-white hover:bg-amber-600 hover:shadow-md"
+                    : "bg-slate-900 text-white hover:bg-slate-800 hover:shadow-md"
+            }`}
+          >
+            <FaPaperPlane className="text-sm" />
+            <span className="text-sm">
+              {sendingId === followUp.id ? "Sending..." : "Send"}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SentFollowUpCard({ followUp }: { followUp: FollowUp }) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-slate-300 transition-all duration-200">
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <FaCheckCircle className="text-emerald-600 text-lg" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg text-slate-900 truncate">
                 {followUp.recipient.name}
               </h3>
+              <p className="text-sm text-slate-500 truncate">
+                {followUp.recipient.email}
+              </p>
             </div>
-            <div className="text-sm text-gray-700 space-y-1">
-              <p className="truncate">
-                <strong>Company:</strong>{" "}
+            <span className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">
+              Sent {followUp.followUpCount}x
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-2 text-slate-700">
+              <FaBuilding className="text-slate-400 flex-shrink-0" />
+              <span className="truncate font-medium">
                 {followUp.recipient.company.companyName}
-              </p>
-              <p className="truncate">
-                <strong>Position:</strong> {followUp.jobPosition}
-              </p>
-              <p className="truncate">
-                <strong>Email:</strong> {followUp.recipient.email}
-              </p>
-              <p>
-                <strong>Sent:</strong>{" "}
-                {new Date(followUp.sentAt).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Due:</strong>{" "}
-                <span className="font-medium">
-                  {formatDate(followUp.followUpScheduledFor)}
-                  {daysUntil < 0 && (
-                    <span className="text-red-600 ml-2">
-                      ({Math.abs(daysUntil)} days overdue)
-                    </span>
-                  )}
-                  {daysUntil === 0 && (
-                    <span className="text-orange-600 ml-2">(Today)</span>
-                  )}
-                </span>
-              </p>
+              </span>
             </div>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <button
-              onClick={() => onPreview(followUp)}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-md text-gray-700 font-medium transition"
-            >
-              <FaEye /> Preview
-            </button>
-            <button
-              onClick={() => onCopy(followUp)}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-md text-gray-700 font-medium transition"
-            >
-              <FaCopy /> Copy
-            </button>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onMarkSent(followUp)}
-              disabled={markingId === followUp.id}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md font-medium transition ${
-                markingId === followUp.id
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-green-600 text-white hover:bg-green-700"
-              }`}
-            >
-              <FaCheck />
-              {markingId === followUp.id ? "Marking..." : "Mark as Sent"}
-            </button>
-            <button
-              onClick={() => onSend(followUp)}
-              disabled={sendingId === followUp.id}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md font-medium transition ${
-                sendingId === followUp.id
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : urgency === "overdue"
-                    ? "bg-red-600 text-white hover:bg-red-700"
-                    : urgency === "today"
-                      ? "bg-orange-600 text-white hover:bg-orange-700"
-                      : "bg-indigo-500 text-white hover:bg-indigo-600"
-              }`}
-            >
-              <FaPaperPlane />
-              {sendingId === followUp.id ? "Sending..." : "Send"}
-            </button>
+            <div className="flex items-center gap-2 text-slate-700">
+              <FaBriefcase className="text-slate-400 flex-shrink-0" />
+              <span className="truncate font-medium">
+                {followUp.jobPosition}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-600">
+              <FaCalendarAlt className="text-slate-400 flex-shrink-0" />
+              <span>
+                Initial: {new Date(followUp.sentAt).toLocaleDateString()}
+              </span>
+            </div>
+            {followUp.lastFollowUpDate && (
+              <div className="flex items-center gap-2 text-slate-600">
+                <FaHistory className="text-slate-400 flex-shrink-0" />
+                <span>
+                  Last:{" "}
+                  {new Date(followUp.lastFollowUpDate).toLocaleDateString()}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -165,7 +256,7 @@ function FollowUpCard({
   );
 }
 
-function FollowUpSections({
+function PendingFollowUpSections({
   categorized,
   onSend,
   onPreview,
@@ -190,15 +281,20 @@ function FollowUpSections({
     <div className="space-y-6">
       {categorized.overdue.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <FaExclamationCircle className="text-red-600 text-xl" />
-            <h2 className="text-lg font-semibold text-red-600">
-              Overdue ({categorized.overdue.length})
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+              <FaExclamationCircle className="text-red-600 text-lg" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">
+              Overdue{" "}
+              <span className="text-red-600">
+                ({categorized.overdue.length})
+              </span>
             </h2>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {categorized.overdue.map((followUp) => (
-              <FollowUpCard
+              <PendingFollowUpCard
                 key={followUp.id}
                 followUp={followUp}
                 onSend={onSend}
@@ -218,15 +314,20 @@ function FollowUpSections({
 
       {categorized.today.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <FaClock className="text-orange-600 text-xl" />
-            <h2 className="text-lg font-semibold text-orange-600">
-              Due Today ({categorized.today.length})
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+              <FaClock className="text-amber-600 text-lg" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">
+              Due Today{" "}
+              <span className="text-amber-600">
+                ({categorized.today.length})
+              </span>
             </h2>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {categorized.today.map((followUp) => (
-              <FollowUpCard
+              <PendingFollowUpCard
                 key={followUp.id}
                 followUp={followUp}
                 onSend={onSend}
@@ -246,15 +347,20 @@ function FollowUpSections({
 
       {categorized.thisWeek.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <FaCalendarAlt className="text-blue-600 text-xl" />
-            <h2 className="text-lg font-semibold text-blue-600">
-              This Week ({categorized.thisWeek.length})
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FaCalendarAlt className="text-blue-600 text-lg" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">
+              This Week{" "}
+              <span className="text-blue-600">
+                ({categorized.thisWeek.length})
+              </span>
             </h2>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {categorized.thisWeek.map((followUp) => (
-              <FollowUpCard
+              <PendingFollowUpCard
                 key={followUp.id}
                 followUp={followUp}
                 onSend={onSend}
@@ -274,15 +380,20 @@ function FollowUpSections({
 
       {categorized.later.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <FaCalendarAlt className="text-gray-500 text-xl" />
-            <h2 className="text-lg font-semibold text-gray-600">
-              Later ({categorized.later.length})
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+              <FaCalendarAlt className="text-slate-500 text-lg" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">
+              Later{" "}
+              <span className="text-slate-500">
+                ({categorized.later.length})
+              </span>
             </h2>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {categorized.later.map((followUp) => (
-              <FollowUpCard
+              <PendingFollowUpCard
                 key={followUp.id}
                 followUp={followUp}
                 onSend={onSend}
@@ -304,10 +415,12 @@ function FollowUpSections({
 }
 
 export default function FollowUps() {
-  const [followUps, setFollowUps] = useState<FollowUp[]>([]);
+  const [pendingFollowUps, setPendingFollowUps] = useState<FollowUp[]>([]);
+  const [sentFollowUps, setSentFollowUps] = useState<FollowUp[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [markingId, setMarkingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"pending" | "sent">("pending");
   const [previewModal, setPreviewModal] = useState({
     isOpen: false,
     emailHtml: "",
@@ -324,7 +437,8 @@ export default function FollowUps() {
     try {
       const response = await fetch("/api/follow-ups");
       const data = await response.json();
-      setFollowUps(data.followUps || []);
+      setPendingFollowUps(data.pendingFollowUps || []);
+      setSentFollowUps(data.sentFollowUps || []);
     } catch (error) {
       console.error("Error fetching follow-ups:", error);
       toast.error("Failed to load follow-ups");
@@ -348,7 +462,9 @@ export default function FollowUps() {
       later: [],
     };
 
-    followUps.forEach((followUp) => {
+    pendingFollowUps.forEach((followUp) => {
+      if (!followUp.followUpScheduledFor) return;
+
       const dueDate = new Date(followUp.followUpScheduledFor);
       const dueDateOnly = new Date(
         dueDate.getFullYear(),
@@ -391,7 +507,10 @@ export default function FollowUps() {
 
       if (response.ok) {
         toast.success("Follow-up email sent successfully!");
-        setFollowUps(followUps.filter((f) => f.id !== followUp.id));
+        setPendingFollowUps(
+          pendingFollowUps.filter((f) => f.id !== followUp.id),
+        );
+        fetchFollowUps();
       } else {
         toast.error("Failed to send follow-up email");
       }
@@ -482,7 +601,10 @@ export default function FollowUps() {
 
       if (response.ok) {
         toast.success("Follow-up marked as sent!");
-        setFollowUps(followUps.filter((f) => f.id !== followUp.id));
+        setPendingFollowUps(
+          pendingFollowUps.filter((f) => f.id !== followUp.id),
+        );
+        fetchFollowUps();
       } else {
         toast.error("Failed to mark follow-up as sent");
       }
@@ -494,6 +616,9 @@ export default function FollowUps() {
     }
   };
 
+  const totalPending = pendingFollowUps.length;
+  const totalSent = sentFollowUps.length;
+
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
@@ -504,46 +629,122 @@ export default function FollowUps() {
         emailSubject={previewModal.emailSubject}
         recipientEmail={previewModal.recipientEmail}
       />
-      <div className="min-h-screen bg-gray-100 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
+      <div className="min-h-screen bg-slate-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            {/* Header */}
+            <div className="bg-slate-900 p-6 border-b border-slate-800">
+              <div className="flex items-center justify-between mb-4">
                 <Link
                   href="/"
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
                 >
                   <FaArrowLeft /> Back
                 </Link>
-                <h1 className="text-2xl font-semibold">Follow-Up Emails</h1>
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                Follow-Up Manager
+              </h1>
+              <p className="text-slate-400">
+                Track and manage your email follow-ups
+              </p>
+            </div>
+
+            {/* Tabs */}
+            <div className="border-b border-slate-200 bg-slate-50">
+              <div className="flex">
+                <button
+                  onClick={() => setActiveTab("pending")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition-all relative ${
+                    activeTab === "pending"
+                      ? "text-slate-900 bg-white"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <FaInbox className="text-lg" />
+                  <span>Pending</span>
+                  {totalPending > 0 && (
+                    <span className="bg-slate-900 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                      {totalPending}
+                    </span>
+                  )}
+                  {activeTab === "pending" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab("sent")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition-all relative ${
+                    activeTab === "sent"
+                      ? "text-slate-900 bg-white"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <FaCheckCircle className="text-lg" />
+                  <span>Sent</span>
+                  {totalSent > 0 && (
+                    <span className="bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                      {totalSent}
+                    </span>
+                  )}
+                  {activeTab === "sent" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900" />
+                  )}
+                </button>
               </div>
             </div>
 
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <FaClock className="animate-spin text-3xl text-indigo-500" />
-              </div>
-            ) : followUps.length === 0 ? (
-              <div className="text-center py-12">
-                <FaCheckCircle className="mx-auto text-5xl text-green-500 mb-4" />
-                <p className="text-gray-600 text-lg">No scheduled follow-ups</p>
-                <p className="text-gray-500 text-sm mt-2">
-                  Send some emails to start scheduling follow-ups
-                </p>
-              </div>
-            ) : (
-              <FollowUpSections
-                categorized={categorizeFollowUps()}
-                onSend={handleSendFollowUp}
-                onPreview={handlePreview}
-                onCopy={handleCopy}
-                onMarkSent={handleMarkSent}
-                sendingId={sendingId}
-                markingId={markingId}
-                formatDate={formatDate}
-                getDaysUntil={getDaysUntil}
-              />
-            )}
+            {/* Content */}
+            <div className="p-6">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <FaClock className="animate-spin text-5xl text-slate-400 mb-4" />
+                  <p className="text-slate-600 text-lg font-medium">
+                    Loading follow-ups...
+                  </p>
+                </div>
+              ) : activeTab === "pending" ? (
+                pendingFollowUps.length === 0 ? (
+                  <div className="text-center py-20">
+                    <FaCheckCircle className="mx-auto text-6xl text-emerald-500 mb-4" />
+                    <p className="text-slate-900 text-xl font-bold mb-2">
+                      All caught up!
+                    </p>
+                    <p className="text-slate-500">
+                      No pending follow-ups at the moment
+                    </p>
+                  </div>
+                ) : (
+                  <PendingFollowUpSections
+                    categorized={categorizeFollowUps()}
+                    onSend={handleSendFollowUp}
+                    onPreview={handlePreview}
+                    onCopy={handleCopy}
+                    onMarkSent={handleMarkSent}
+                    sendingId={sendingId}
+                    markingId={markingId}
+                    formatDate={formatDate}
+                    getDaysUntil={getDaysUntil}
+                  />
+                )
+              ) : sentFollowUps.length === 0 ? (
+                <div className="text-center py-20">
+                  <FaHistory className="mx-auto text-6xl text-slate-300 mb-4" />
+                  <p className="text-slate-900 text-xl font-bold mb-2">
+                    No sent follow-ups yet
+                  </p>
+                  <p className="text-slate-500">
+                    Follow-ups you send will appear here
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {sentFollowUps.map((followUp) => (
+                    <SentFollowUpCard key={followUp.id} followUp={followUp} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
