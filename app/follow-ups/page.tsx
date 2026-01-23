@@ -95,35 +95,35 @@ function PendingFollowUpCard({
 
   return (
     <div
-      className={`${config.bg} ${config.border} border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-slate-300 transition-all duration-200`}
+      className={`${config.bg} ${config.border} border border-slate-200 rounded-lg p-4 hover:shadow-md hover:border-slate-300 transition-all duration-200`}
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <FaEnvelope className="text-slate-700 text-lg" />
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <FaEnvelope className="text-slate-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg text-slate-900 truncate">
+                <h3 className="font-semibold text-base text-slate-900 truncate">
                   {followUp.recipient.name}
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
+                <p className="text-xs text-slate-500 truncate">
                   {followUp.recipient.email}
                 </p>
               </div>
             </div>
           </div>
           <span
-            className={`${config.badge} px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap`}
+            className={`${config.badge} px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap`}
           >
             {config.badgeText}
           </span>
         </div>
 
         {/* Details */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-2 gap-2.5 text-xs">
           <div className="flex items-center gap-2 text-slate-700">
             <FaBuilding className="text-slate-400 flex-shrink-0" />
             <span className="truncate font-medium">
@@ -147,39 +147,39 @@ function PendingFollowUpCard({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2 border-t border-slate-200">
+        <div className="flex gap-2 pt-2.5 border-t border-slate-200">
           <button
             onClick={() => onPreview(followUp)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 rounded-lg text-slate-700 font-medium transition-all"
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 rounded-md text-slate-700 font-medium transition-all"
           >
-            <FaEye className="text-sm" />
-            <span className="text-sm">Preview</span>
+            <FaEye className="text-xs" />
+            <span className="text-xs">Preview</span>
           </button>
           <button
             onClick={() => onCopy(followUp)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 rounded-lg text-slate-700 font-medium transition-all"
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 rounded-md text-slate-700 font-medium transition-all"
           >
-            <FaCopy className="text-sm" />
-            <span className="text-sm">Copy</span>
+            <FaCopy className="text-xs" />
+            <span className="text-xs">Copy</span>
           </button>
           <button
             onClick={() => onMarkSent(followUp)}
             disabled={markingId === followUp.id}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-semibold transition-all ${
               markingId === followUp.id
                 ? "bg-slate-200 text-slate-500 cursor-not-allowed"
                 : "bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-md"
             }`}
           >
-            <FaCheck className="text-sm" />
-            <span className="text-sm">
+            <FaCheck className="text-xs" />
+            <span className="text-xs">
               {markingId === followUp.id ? "Marking..." : "Mark Sent"}
             </span>
           </button>
           <button
             onClick={() => onSend(followUp)}
             disabled={sendingId === followUp.id}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-semibold transition-all ${
               sendingId === followUp.id
                 ? "bg-slate-200 text-slate-500 cursor-not-allowed"
                 : urgency === "overdue"
@@ -189,8 +189,8 @@ function PendingFollowUpCard({
                     : "bg-slate-900 text-white hover:bg-slate-800 hover:shadow-md"
             }`}
           >
-            <FaPaperPlane className="text-sm" />
-            <span className="text-sm">
+            <FaPaperPlane className="text-xs" />
+            <span className="text-xs">
               {sendingId === followUp.id ? "Sending..." : "Send"}
             </span>
           </button>
@@ -202,26 +202,26 @@ function PendingFollowUpCard({
 
 function SentFollowUpCard({ followUp }: { followUp: FollowUp }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-slate-300 transition-all duration-200">
-      <div className="flex items-start gap-4">
-        <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-          <FaCheckCircle className="text-emerald-600 text-lg" />
+    <div className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md hover:border-slate-300 transition-all duration-200">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <FaCheckCircle className="text-emerald-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg text-slate-900 truncate">
+              <h3 className="font-semibold text-base text-slate-900 truncate">
                 {followUp.recipient.name}
               </h3>
-              <p className="text-sm text-slate-500 truncate">
+              <p className="text-xs text-slate-500 truncate">
                 {followUp.recipient.email}
               </p>
             </div>
-            <span className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">
+            <span className="bg-emerald-600 text-white px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">
               Sent {followUp.followUpCount}x
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-2 gap-2.5 text-xs">
             <div className="flex items-center gap-2 text-slate-700">
               <FaBuilding className="text-slate-400 flex-shrink-0" />
               <span className="truncate font-medium">
@@ -278,21 +278,21 @@ function PendingFollowUpSections({
   getDaysUntil: (date: string) => number;
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {categorized.overdue.length > 0 && (
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-              <FaExclamationCircle className="text-red-600 text-lg" />
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-7 h-7 bg-red-100 rounded-lg flex items-center justify-center">
+              <FaExclamationCircle className="text-red-600" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Overdue{" "}
               <span className="text-red-600">
                 ({categorized.overdue.length})
               </span>
             </h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {categorized.overdue.map((followUp) => (
               <PendingFollowUpCard
                 key={followUp.id}
@@ -314,18 +314,18 @@ function PendingFollowUpSections({
 
       {categorized.today.length > 0 && (
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
-              <FaClock className="text-amber-600 text-lg" />
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center">
+              <FaClock className="text-amber-600" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Due Today{" "}
               <span className="text-amber-600">
                 ({categorized.today.length})
               </span>
             </h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {categorized.today.map((followUp) => (
               <PendingFollowUpCard
                 key={followUp.id}
@@ -347,18 +347,18 @@ function PendingFollowUpSections({
 
       {categorized.thisWeek.length > 0 && (
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FaCalendarAlt className="text-blue-600 text-lg" />
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FaCalendarAlt className="text-blue-600" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               This Week{" "}
               <span className="text-blue-600">
                 ({categorized.thisWeek.length})
               </span>
             </h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {categorized.thisWeek.map((followUp) => (
               <PendingFollowUpCard
                 key={followUp.id}
@@ -380,18 +380,18 @@ function PendingFollowUpSections({
 
       {categorized.later.length > 0 && (
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-              <FaCalendarAlt className="text-slate-500 text-lg" />
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center">
+              <FaCalendarAlt className="text-slate-500" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Later{" "}
               <span className="text-slate-500">
                 ({categorized.later.length})
               </span>
             </h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {categorized.later.map((followUp) => (
               <PendingFollowUpCard
                 key={followUp.id}
@@ -629,23 +629,23 @@ export default function FollowUps() {
         emailSubject={previewModal.emailSubject}
         recipientEmail={previewModal.recipientEmail}
       />
-      <div className="min-h-screen bg-slate-50 p-6">
+      <div className="min-h-screen bg-slate-50 p-4">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             {/* Header */}
-            <div className="bg-slate-900 p-6 border-b border-slate-800">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-slate-900 px-6 py-4 border-b border-slate-800">
+              <div className="flex items-center justify-between mb-3">
                 <Link
                   href="/"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
                 >
                   <FaArrowLeft /> Back
                 </Link>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">
+              <h1 className="text-2xl font-bold text-white mb-1">
                 Follow-Up Manager
               </h1>
-              <p className="text-slate-400">
+              <p className="text-sm text-slate-400">
                 Track and manage your email follow-ups
               </p>
             </div>
@@ -655,16 +655,16 @@ export default function FollowUps() {
               <div className="flex">
                 <button
                   onClick={() => setActiveTab("pending")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition-all relative ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold transition-all relative ${
                     activeTab === "pending"
                       ? "text-slate-900 bg-white"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
-                  <FaInbox className="text-lg" />
+                  <FaInbox />
                   <span>Pending</span>
                   {totalPending > 0 && (
-                    <span className="bg-slate-900 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                    <span className="bg-slate-900 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                       {totalPending}
                     </span>
                   )}
@@ -674,16 +674,16 @@ export default function FollowUps() {
                 </button>
                 <button
                   onClick={() => setActiveTab("sent")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition-all relative ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold transition-all relative ${
                     activeTab === "sent"
                       ? "text-slate-900 bg-white"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
-                  <FaCheckCircle className="text-lg" />
+                  <FaCheckCircle />
                   <span>Sent</span>
                   {totalSent > 0 && (
-                    <span className="bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                    <span className="bg-emerald-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                       {totalSent}
                     </span>
                   )}
@@ -695,22 +695,22 @@ export default function FollowUps() {
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-4">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-20">
-                  <FaClock className="animate-spin text-5xl text-slate-400 mb-4" />
-                  <p className="text-slate-600 text-lg font-medium">
+                <div className="flex flex-col items-center justify-center py-12">
+                  <FaClock className="animate-spin text-4xl text-slate-400 mb-3" />
+                  <p className="text-slate-600 font-medium">
                     Loading follow-ups...
                   </p>
                 </div>
               ) : activeTab === "pending" ? (
                 pendingFollowUps.length === 0 ? (
-                  <div className="text-center py-20">
-                    <FaCheckCircle className="mx-auto text-6xl text-emerald-500 mb-4" />
-                    <p className="text-slate-900 text-xl font-bold mb-2">
+                  <div className="text-center py-12">
+                    <FaCheckCircle className="mx-auto text-5xl text-emerald-500 mb-3" />
+                    <p className="text-slate-900 text-lg font-bold mb-1">
                       All caught up!
                     </p>
-                    <p className="text-slate-500">
+                    <p className="text-sm text-slate-500">
                       No pending follow-ups at the moment
                     </p>
                   </div>
@@ -728,17 +728,17 @@ export default function FollowUps() {
                   />
                 )
               ) : sentFollowUps.length === 0 ? (
-                <div className="text-center py-20">
-                  <FaHistory className="mx-auto text-6xl text-slate-300 mb-4" />
-                  <p className="text-slate-900 text-xl font-bold mb-2">
+                <div className="text-center py-12">
+                  <FaHistory className="mx-auto text-5xl text-slate-300 mb-3" />
+                  <p className="text-slate-900 text-lg font-bold mb-1">
                     No sent follow-ups yet
                   </p>
-                  <p className="text-slate-500">
+                  <p className="text-sm text-slate-500">
                     Follow-ups you send will appear here
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {sentFollowUps.map((followUp) => (
                     <SentFollowUpCard key={followUp.id} followUp={followUp} />
                   ))}
