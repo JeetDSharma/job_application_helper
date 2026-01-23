@@ -19,6 +19,8 @@ import {
   FaHistory,
   FaClock,
   FaReply,
+  FaCalendarAlt,
+  FaTimes,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
@@ -44,6 +46,12 @@ export default function Home() {
     emailHtml: "",
     emailSubject: "",
   });
+  const [scheduleModal, setScheduleModal] = useState({
+    isOpen: false,
+    scheduledDate: "",
+    scheduledTime: "",
+  });
+  const [isScheduling, setIsScheduling] = useState(false);
   const [recipientCheck, setRecipientCheck] = useState<{
     exists: boolean;
     loading: boolean;
@@ -340,6 +348,86 @@ Jeet Sharma`;
       .catch(() => {
         toast.error("Failed to copy InMail content.");
       });
+  };
+
+  const handleOpenScheduleModal = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dateStr = tomorrow.toISOString().split("T")[0];
+    const timeStr = "09:00";
+
+    setScheduleModal({
+      isOpen: true,
+      scheduledDate: dateStr,
+      scheduledTime: timeStr,
+    });
+  };
+
+  const handleScheduleEmail = async () => {
+    if (!scheduleModal.scheduledDate || !scheduleModal.scheduledTime) {
+      toast.error("Please select a date and time");
+      return;
+    }
+
+    setIsScheduling(true);
+    try {
+      const scheduledDateTime = new Date(
+        `${scheduleModal.scheduledDate}T${scheduleModal.scheduledTime}`,
+      );
+
+      const response = await fetch("/api/schedule-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...emailForm,
+          scheduledFor: scheduledDateTime.toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Email scheduled successfully!");
+        setScheduleModal({
+          isOpen: false,
+          scheduledDate: "",
+          scheduledTime: "",
+        });
+        setEmailForm({
+          email: "",
+          name: "",
+          company: "",
+          jobPosition: "",
+          isAlum: false,
+          isRecruiter: false,
+          tenureYears: "",
+          personalMention: "",
+        });
+        setFormErrors({
+          email: "",
+          name: "",
+          company: "",
+          jobPosition: "",
+        });
+        setTouched({
+          email: false,
+          name: false,
+          company: false,
+          jobPosition: false,
+        });
+      } else {
+        const errorData = await response.json();
+        console.error("Schedule email error:", errorData);
+        toast.error(
+          `Failed to schedule email: ${errorData.details || errorData.error || "Unknown error"}`,
+        );
+      }
+    } catch (error) {
+      console.error("Error scheduling email:", error);
+      toast.error("Failed to schedule email");
+    } finally {
+      setIsScheduling(false);
+    }
   };
 
   const handleCopyLinkedInMessage = () => {
@@ -666,6 +754,18 @@ Jeet Sharma`;
                 >
                   <FaPaperPlane /> Send Email
                 </button>
+                <button
+                  type="button"
+                  onClick={handleOpenScheduleModal}
+                  disabled={!isFormValid()}
+                  className={`flex-1 flex items-center justify-center gap-2 border rounded-md px-4 py-2.5 font-medium transition shadow-sm ${
+                    isFormValid()
+                      ? "border-blue-600 bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
+                      : "border-gray-300 bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <FaCalendarAlt /> Schedule
+                </button>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
@@ -697,6 +797,124 @@ Jeet Sharma`;
           </form>
         </div>
       </div>
+
+      {/* Schedule Modal */}
+      {scheduleModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <FaCalendarAlt className="text-blue-600" />
+                Schedule Email
+              </h2>
+              <button
+                onClick={() =>
+                  setScheduleModal({
+                    isOpen: false,
+                    scheduledDate: "",
+                    scheduledTime: "",
+                  })
+                }
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={scheduleModal.scheduledDate}
+                  onChange={(e) =>
+                    setScheduleModal({
+                      ...scheduleModal,
+                      scheduledDate: e.target.value,
+                    })
+                  }
+                  min={new Date().toISOString().split("T")[0]}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Time
+                </label>
+                <input
+                  type="time"
+                  value={scheduleModal.scheduledTime}
+                  onChange={(e) =>
+                    setScheduleModal({
+                      ...scheduleModal,
+                      scheduledTime: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                <p className="text-sm text-blue-800">
+                  <strong>Recipient:</strong> {emailForm.name} (
+                  {emailForm.email})
+                </p>
+                <p className="text-sm text-blue-800 mt-1">
+                  <strong>Company:</strong> {emailForm.company}
+                </p>
+                <p className="text-sm text-blue-800 mt-1">
+                  <strong>Position:</strong> {emailForm.jobPosition}
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() =>
+                    setScheduleModal({
+                      isOpen: false,
+                      scheduledDate: "",
+                      scheduledTime: "",
+                    })
+                  }
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleScheduleEmail}
+                  disabled={
+                    isScheduling ||
+                    !scheduleModal.scheduledDate ||
+                    !scheduleModal.scheduledTime
+                  }
+                  className={`flex-1 px-4 py-2 rounded-md font-medium transition flex items-center justify-center gap-2 ${
+                    isScheduling ||
+                    !scheduleModal.scheduledDate ||
+                    !scheduleModal.scheduledTime
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
+                >
+                  {isScheduling ? (
+                    <>
+                      <FaClock className="animate-spin" />
+                      Scheduling...
+                    </>
+                  ) : (
+                    <>
+                      <FaCalendarAlt />
+                      Schedule Email
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

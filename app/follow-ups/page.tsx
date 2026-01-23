@@ -17,6 +17,8 @@ import {
   FaBriefcase,
   FaHistory,
   FaInbox,
+  FaTimes,
+  FaEdit,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildFollowUpTemplate } from "@/templates/followUpTemplate";
@@ -35,6 +37,34 @@ type FollowUp = {
       companyName: string;
     };
   };
+};
+
+type ScheduledEmail = {
+  id: string;
+  createdAt: string;
+  scheduledFor: string;
+  subject: string;
+  htmlBody: string;
+  jobPosition: string;
+  templateUsed: string;
+  isFollowUp: boolean;
+  isAlum: boolean;
+  isRecruiter: boolean;
+  status: string;
+  recipient: {
+    name: string;
+    email: string;
+    company: {
+      companyName: string;
+    };
+  };
+};
+
+type CategorizedScheduledEmails = {
+  overdue: ScheduledEmail[];
+  today: ScheduledEmail[];
+  thisWeek: ScheduledEmail[];
+  later: ScheduledEmail[];
 };
 
 type CategorizedFollowUps = {
@@ -256,6 +286,148 @@ function SentFollowUpCard({ followUp }: { followUp: FollowUp }) {
   );
 }
 
+function ScheduledEmailCard({
+  email,
+  onSend,
+  onPreview,
+  onCancel,
+  sendingId,
+  cancellingId,
+  formatDate,
+  formatTime,
+  getDaysUntil,
+  urgency,
+}: {
+  email: ScheduledEmail;
+  onSend: (email: ScheduledEmail) => void;
+  onPreview: (email: ScheduledEmail) => void;
+  onCancel: (email: ScheduledEmail) => void;
+  sendingId: string | null;
+  cancellingId: string | null;
+  formatDate: (date: string) => string;
+  formatTime: (date: string) => string;
+  getDaysUntil: (date: string) => number;
+  urgency: "overdue" | "today" | "normal";
+}) {
+  const daysUntil = getDaysUntil(email.scheduledFor);
+  const urgencyConfig = {
+    overdue: {
+      bg: "bg-white",
+      border: "border-l-4 border-red-600",
+      badge: "bg-red-600 text-white",
+      badgeText: `${Math.abs(daysUntil)} days overdue`,
+    },
+    today: {
+      bg: "bg-white",
+      border: "border-l-4 border-amber-500",
+      badge: "bg-amber-500 text-white",
+      badgeText: "Due Today",
+    },
+    normal: {
+      bg: "bg-white",
+      border: "border-l-4 border-blue-500",
+      badge: "bg-blue-500 text-white",
+      badgeText: daysUntil === 1 ? "Tomorrow" : `In ${daysUntil} days`,
+    },
+  };
+
+  const config = urgencyConfig[urgency];
+
+  return (
+    <div
+      className={`${config.bg} ${config.border} border border-slate-200 rounded-lg p-4 hover:shadow-md hover:border-slate-300 transition-all duration-200`}
+    >
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <FaClock className="text-blue-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base text-slate-900 truncate">
+                  {email.recipient.name}
+                </h3>
+                <p className="text-xs text-slate-500 truncate">
+                  {email.recipient.email}
+                </p>
+              </div>
+            </div>
+          </div>
+          <span
+            className={`${config.badge} px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap`}
+          >
+            {config.badgeText}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 text-xs">
+          <div className="flex items-center gap-2 text-slate-700">
+            <FaBuilding className="text-slate-400 flex-shrink-0" />
+            <span className="truncate font-medium">
+              {email.recipient.company.companyName}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-700">
+            <FaBriefcase className="text-slate-400 flex-shrink-0" />
+            <span className="truncate font-medium">{email.jobPosition}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-600">
+            <FaCalendarAlt className="text-slate-400 flex-shrink-0" />
+            <span>Scheduled: {formatDate(email.scheduledFor)}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-600">
+            <FaClock className="text-slate-400 flex-shrink-0" />
+            <span>Time: {formatTime(email.scheduledFor)}</span>
+          </div>
+        </div>
+
+        <div className="flex gap-2 pt-2.5 border-t border-slate-200">
+          <button
+            onClick={() => onPreview(email)}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 rounded-md text-slate-700 font-medium transition-all"
+          >
+            <FaEye className="text-xs" />
+            <span className="text-xs">Preview</span>
+          </button>
+          <button
+            onClick={() => onCancel(email)}
+            disabled={cancellingId === email.id}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-medium transition-all ${
+              cancellingId === email.id
+                ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                : "border border-red-300 bg-white hover:bg-red-50 hover:border-red-400 text-red-700"
+            }`}
+          >
+            <FaTimes className="text-xs" />
+            <span className="text-xs">
+              {cancellingId === email.id ? "Cancelling..." : "Cancel"}
+            </span>
+          </button>
+          <button
+            onClick={() => onSend(email)}
+            disabled={sendingId === email.id}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-semibold transition-all ${
+              sendingId === email.id
+                ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                : urgency === "overdue"
+                  ? "bg-red-600 text-white hover:bg-red-700 hover:shadow-md"
+                  : urgency === "today"
+                    ? "bg-amber-500 text-white hover:bg-amber-600 hover:shadow-md"
+                    : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
+            }`}
+          >
+            <FaPaperPlane className="text-xs" />
+            <span className="text-xs">
+              {sendingId === email.id ? "Sending..." : "Send Now"}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PendingFollowUpSections({
   categorized,
   onSend,
@@ -414,13 +586,184 @@ function PendingFollowUpSections({
   );
 }
 
+function ScheduledEmailSections({
+  categorized,
+  onSend,
+  onPreview,
+  onCancel,
+  sendingId,
+  cancellingId,
+  formatDate,
+  formatTime,
+  getDaysUntil,
+}: {
+  categorized: CategorizedScheduledEmails;
+  onSend: (email: ScheduledEmail) => void;
+  onPreview: (email: ScheduledEmail) => void;
+  onCancel: (email: ScheduledEmail) => void;
+  sendingId: string | null;
+  cancellingId: string | null;
+  formatDate: (date: string) => string;
+  formatTime: (date: string) => string;
+  getDaysUntil: (date: string) => number;
+}) {
+  return (
+    <div className="space-y-5">
+      {categorized.overdue.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-7 h-7 bg-red-100 rounded-lg flex items-center justify-center">
+              <FaExclamationCircle className="text-red-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">
+              Overdue{" "}
+              <span className="text-red-600">
+                ({categorized.overdue.length})
+              </span>
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {categorized.overdue.map((email) => (
+              <ScheduledEmailCard
+                key={email.id}
+                email={email}
+                onSend={onSend}
+                onPreview={onPreview}
+                onCancel={onCancel}
+                sendingId={sendingId}
+                cancellingId={cancellingId}
+                formatDate={formatDate}
+                formatTime={formatTime}
+                getDaysUntil={getDaysUntil}
+                urgency="overdue"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {categorized.today.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center">
+              <FaClock className="text-amber-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">
+              Due Today{" "}
+              <span className="text-amber-600">
+                ({categorized.today.length})
+              </span>
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {categorized.today.map((email) => (
+              <ScheduledEmailCard
+                key={email.id}
+                email={email}
+                onSend={onSend}
+                onPreview={onPreview}
+                onCancel={onCancel}
+                sendingId={sendingId}
+                cancellingId={cancellingId}
+                formatDate={formatDate}
+                formatTime={formatTime}
+                getDaysUntil={getDaysUntil}
+                urgency="today"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {categorized.thisWeek.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FaCalendarAlt className="text-blue-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">
+              This Week{" "}
+              <span className="text-blue-600">
+                ({categorized.thisWeek.length})
+              </span>
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {categorized.thisWeek.map((email) => (
+              <ScheduledEmailCard
+                key={email.id}
+                email={email}
+                onSend={onSend}
+                onPreview={onPreview}
+                onCancel={onCancel}
+                sendingId={sendingId}
+                cancellingId={cancellingId}
+                formatDate={formatDate}
+                formatTime={formatTime}
+                getDaysUntil={getDaysUntil}
+                urgency="normal"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {categorized.later.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center">
+              <FaCalendarAlt className="text-slate-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">
+              Later{" "}
+              <span className="text-slate-600">
+                ({categorized.later.length})
+              </span>
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {categorized.later.map((email) => (
+              <ScheduledEmailCard
+                key={email.id}
+                email={email}
+                onSend={onSend}
+                onPreview={onPreview}
+                onCancel={onCancel}
+                sendingId={sendingId}
+                cancellingId={cancellingId}
+                formatDate={formatDate}
+                formatTime={formatTime}
+                getDaysUntil={getDaysUntil}
+                urgency="normal"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function FollowUps() {
   const [pendingFollowUps, setPendingFollowUps] = useState<FollowUp[]>([]);
   const [sentFollowUps, setSentFollowUps] = useState<FollowUp[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [markingId, setMarkingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"pending" | "sent">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "sent" | "scheduled">(
+    "pending",
+  );
+  const [scheduledEmails, setScheduledEmails] =
+    useState<CategorizedScheduledEmails>({
+      overdue: [],
+      today: [],
+      thisWeek: [],
+      later: [],
+    });
+  const [sendingScheduledId, setSendingScheduledId] = useState<string | null>(
+    null,
+  );
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [previewModal, setPreviewModal] = useState({
     isOpen: false,
     emailHtml: "",
@@ -430,6 +773,7 @@ export default function FollowUps() {
 
   useEffect(() => {
     fetchFollowUps();
+    fetchScheduledEmails();
   }, []);
 
   const fetchFollowUps = async () => {
@@ -444,6 +788,17 @@ export default function FollowUps() {
       toast.error("Failed to load follow-ups");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchScheduledEmails = async () => {
+    try {
+      const response = await fetch("/api/scheduled-emails");
+      const data = await response.json();
+      setScheduledEmails(data);
+    } catch (error) {
+      console.error("Error fetching scheduled emails:", error);
+      toast.error("Failed to load scheduled emails");
     }
   };
 
@@ -528,6 +883,15 @@ export default function FollowUps() {
       weekday: "short",
       month: "short",
       day: "numeric",
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -616,8 +980,77 @@ export default function FollowUps() {
     }
   };
 
+  const handleSendScheduledEmail = async (email: ScheduledEmail) => {
+    setSendingScheduledId(email.id);
+    try {
+      const response = await fetch("/api/send-scheduled-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          scheduledEmailId: email.id,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Email sent successfully!");
+        fetchScheduledEmails();
+      } else {
+        toast.error("Failed to send email");
+      }
+    } catch (error) {
+      console.error("Error sending scheduled email:", error);
+      toast.error("Failed to send email");
+    } finally {
+      setSendingScheduledId(null);
+    }
+  };
+
+  const handlePreviewScheduledEmail = (email: ScheduledEmail) => {
+    setPreviewModal({
+      isOpen: true,
+      emailHtml: email.htmlBody,
+      emailSubject: email.subject,
+      recipientEmail: email.recipient.email,
+    });
+  };
+
+  const handleCancelScheduledEmail = async (email: ScheduledEmail) => {
+    setCancellingId(email.id);
+    try {
+      const response = await fetch("/api/update-scheduled-email", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: email.id,
+          cancel: true,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Scheduled email cancelled");
+        fetchScheduledEmails();
+      } else {
+        toast.error("Failed to cancel scheduled email");
+      }
+    } catch (error) {
+      console.error("Error cancelling scheduled email:", error);
+      toast.error("Failed to cancel scheduled email");
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
   const totalPending = pendingFollowUps.length;
   const totalSent = sentFollowUps.length;
+  const totalScheduled =
+    scheduledEmails.overdue.length +
+    scheduledEmails.today.length +
+    scheduledEmails.thisWeek.length +
+    scheduledEmails.later.length;
 
   return (
     <>
@@ -673,6 +1106,25 @@ export default function FollowUps() {
                   )}
                 </button>
                 <button
+                  onClick={() => setActiveTab("scheduled")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold transition-all relative ${
+                    activeTab === "scheduled"
+                      ? "text-slate-900 bg-white"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <FaClock />
+                  <span>Scheduled</span>
+                  {totalScheduled > 0 && (
+                    <span className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {totalScheduled}
+                    </span>
+                  )}
+                  {activeTab === "scheduled" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900" />
+                  )}
+                </button>
+                <button
                   onClick={() => setActiveTab("sent")}
                   className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold transition-all relative ${
                     activeTab === "sent"
@@ -724,6 +1176,30 @@ export default function FollowUps() {
                     sendingId={sendingId}
                     markingId={markingId}
                     formatDate={formatDate}
+                    getDaysUntil={getDaysUntil}
+                  />
+                )
+              ) : activeTab === "scheduled" ? (
+                totalScheduled === 0 ? (
+                  <div className="text-center py-12">
+                    <FaClock className="mx-auto text-5xl text-slate-300 mb-3" />
+                    <p className="text-slate-900 text-lg font-bold mb-1">
+                      No scheduled emails
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      Emails you schedule will appear here
+                    </p>
+                  </div>
+                ) : (
+                  <ScheduledEmailSections
+                    categorized={scheduledEmails}
+                    onSend={handleSendScheduledEmail}
+                    onPreview={handlePreviewScheduledEmail}
+                    onCancel={handleCancelScheduledEmail}
+                    sendingId={sendingScheduledId}
+                    cancellingId={cancellingId}
+                    formatDate={formatDate}
+                    formatTime={formatTime}
                     getDaysUntil={getDaysUntil}
                   />
                 )

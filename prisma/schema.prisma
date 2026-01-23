@@ -18,13 +18,14 @@ model Company {
 }
 
 model Recipient {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  name      String
-  isAlumni  Boolean
-  company   Company    @relation(fields: [companyId], references: [id])
-  companyId String
-  emailLogs EmailLog[]
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String
+  isAlumni        Boolean
+  company         Company          @relation(fields: [companyId], references: [id])
+  companyId       String
+  emailLogs       EmailLog[]
+  scheduledEmails ScheduledEmail[]
 
   @@index([email])
 }
@@ -49,4 +50,27 @@ model EmailLog {
   lastFollowUpDate     DateTime?
 
   @@index([followUpScheduledFor, responseReceived])
+}
+
+model ScheduledEmail {
+  id              String    @id @default(uuid())
+  createdAt       DateTime  @default(now())
+  scheduledFor    DateTime
+  recipientId     String
+  recipient       Recipient @relation(fields: [recipientId], references: [id])
+  subject         String
+  htmlBody        String
+  jobPosition     String
+  templateUsed    String
+  isFollowUp      Boolean   @default(false)
+  isAlum          Boolean   @default(false)
+  isRecruiter     Boolean   @default(false)
+  tenureYears     Int?
+  personalMention String?
+  status          String    @default("SCHEDULED")
+  sentAt          DateTime?
+  emailLogId      String?
+
+  @@index([scheduledFor, status])
+  @@index([recipientId])
 }
