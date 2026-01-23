@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import {
@@ -62,11 +62,7 @@ export default function EmailHistoryPage() {
   const [followUpDate, setFollowUpDate] = useState("");
   const [sendingFollowUp, setSendingFollowUp] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchEmailLogs();
-  }, [statusFilter, companyFilter]);
-
-  const fetchEmailLogs = async () => {
+  const fetchEmailLogs = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -114,7 +110,11 @@ export default function EmailHistoryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, companyFilter]);
+
+  useEffect(() => {
+    fetchEmailLogs();
+  }, [fetchEmailLogs]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -208,10 +208,7 @@ export default function EmailHistoryPage() {
     }
   };
 
-  const handleCompleteFollowUp = async (
-    emailLogId: string,
-    currentCount: number,
-  ) => {
+  const handleCompleteFollowUp = async (emailLogId: string) => {
     try {
       await fetch("/api/update-email-log", {
         method: "PATCH",
@@ -611,12 +608,7 @@ export default function EmailHistoryPage() {
                                 </button>
                               ) : (
                                 <button
-                                  onClick={() =>
-                                    handleCompleteFollowUp(
-                                      log.id,
-                                      log.followUpCount,
-                                    )
-                                  }
+                                  onClick={() => handleCompleteFollowUp(log.id)}
                                   className="p-2 rounded transition bg-purple-100 text-purple-600 hover:bg-purple-200"
                                   title="Cancel scheduled follow-up"
                                 >
@@ -680,8 +672,8 @@ export default function EmailHistoryPage() {
                     min={new Date().toISOString().slice(0, 16)}
                   />
                   <p className="text-xs text-gray-500 mt-2">
-                    You'll see this email in the "Follow-up" count when the date
-                    arrives
+                    You&apos;ll see this email in the &quot;Follow-up&quot;
+                    count when the date arrives
                   </p>
                 </div>
                 <div className="flex gap-3 justify-end">

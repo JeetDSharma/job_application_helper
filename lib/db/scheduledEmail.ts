@@ -79,7 +79,7 @@ export async function getScheduledEmailById(id: string) {
 }
 
 export async function updateScheduledEmail(data: UpdateScheduledEmail) {
-  const updateData: any = {};
+  const updateData: Record<string, Date | string> = {};
   if (data.scheduledFor) updateData.scheduledFor = data.scheduledFor;
   if (data.subject) updateData.subject = data.subject;
   if (data.htmlBody) updateData.htmlBody = data.htmlBody;

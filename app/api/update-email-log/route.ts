@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const updateData: any = {};
+    const updateData: Record<string, boolean | string | Date | null> = {};
 
     if (isMarkedWrong !== undefined) {
       updateData.isMarkedWrong = isMarkedWrong;

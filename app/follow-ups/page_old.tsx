@@ -13,9 +13,6 @@ import {
   FaEye,
   FaCopy,
   FaCheck,
-  FaBuilding,
-  FaBriefcase,
-  FaHistory,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildFollowUpTemplate } from "@/templates/followUpTemplate";

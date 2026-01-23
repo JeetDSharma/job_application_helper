@@ -1,7 +1,6 @@
 "use client";
 import CompanyCard from "@/components/company/CompanyCard";
 import CompanyStatsCard from "@/components/company/CompanyStatsCard";
-import CompanyTable from "@/components/company/CompanyTable";
 import React, { useEffect, useState } from "react";
 type CompanyTableInput = {
   companyName: string;
@@ -46,14 +45,6 @@ export function CompanyDirectory() {
     fetchCompanyStats();
   }, []);
 
-  const companyTableInput: CompanyTableInput[] = [
-    {
-      companyName: "Amazon",
-      recipientCount: 10,
-      createdAt: new Date("10/10/2025"),
-    },
-  ];
-
   return (
     <div className="flex flex-col">
       <CompanyStatsCard
@@ -63,6 +54,7 @@ export function CompanyDirectory() {
       <div className="flex flex-wrap gap-8 mx-auto justify-center px-4">
         {companyData.map((company) => (
           <CompanyCard
+            key={company.companyName}
             companyName={company.companyName}
             recipientCount={company.recipientCount}
           />

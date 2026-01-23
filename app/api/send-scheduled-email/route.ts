@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
