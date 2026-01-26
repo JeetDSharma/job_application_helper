@@ -20,6 +20,7 @@ import {
   FaReply,
   FaCalendarAlt,
   FaTimes,
+  FaChartLine,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
@@ -671,6 +672,12 @@ Jeet Sharma`;
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold">Send Email</h1>
             <div className="flex items-center gap-3">
+              <Link
+                href="/analytics"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded-md transition"
+              >
+                <FaChartLine /> Analytics
+              </Link>
               <Link
                 href="/follow-ups"
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-orange-600 hover:text-orange-800 hover:bg-orange-50 rounded-md transition"
