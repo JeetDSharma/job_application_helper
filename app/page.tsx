@@ -205,6 +205,7 @@ export default function Home() {
     tenureYears: "",
     personalMention: "",
   });
+  const emailInputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [previewModal, setPreviewModal] = useState({
@@ -417,7 +418,7 @@ export default function Home() {
           toast.success("Email Sent Successfully!");
           // Smart Reset: Clear specific fields for next applicant at same company
           setEmailForm({
-            email: "",
+            email: emailForm.email,
             name: "",
             company: emailForm.company,
             jobPosition: emailForm.jobPosition,
@@ -426,6 +427,14 @@ export default function Home() {
             tenureYears: "",
             personalMention: "",
           });
+
+          // Smart Focus: Select username for quick editing
+          const atIndex = emailForm.email.indexOf("@");
+          if (atIndex > 0 && emailInputRef.current) {
+            emailInputRef.current.focus();
+            emailInputRef.current.setSelectionRange(0, atIndex);
+          }
+
           // Reset validation errors
           setFormErrors({
             email: "",
@@ -573,7 +582,7 @@ Jeet Sharma`;
         });
         // Smart Reset: Clear specific fields for next applicant at same company
         setEmailForm({
-          email: "",
+          email: emailForm.email,
           name: "",
           company: emailForm.company,
           jobPosition: emailForm.jobPosition,
@@ -582,6 +591,19 @@ Jeet Sharma`;
           tenureYears: "",
           personalMention: "",
         });
+
+        // Smart Focus: Select username for quick editing
+        const atIndex = emailForm.email.indexOf("@");
+        if (atIndex > 0 && emailInputRef.current) {
+          // Small timeout to allow modal to close and focus to return
+          setTimeout(() => {
+            if (emailInputRef.current) {
+              emailInputRef.current.focus();
+              emailInputRef.current.setSelectionRange(0, atIndex);
+            }
+          }, 100);
+        }
+
         setFormErrors({
           email: "",
           name: "",
@@ -679,6 +701,7 @@ Jeet Sharma`;
                 <FaEnvelope /> Email <span className="text-red-500">*</span>
               </label>
               <input
+                ref={emailInputRef}
                 type="email"
                 name="email"
                 id="email"
