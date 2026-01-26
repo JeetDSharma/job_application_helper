@@ -28,24 +28,62 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    if (!recipient) {
-      return NextResponse.json({ exists: false }, { status: 200 });
+    // If exact recipient found, return them
+    if (recipient) {
+      return NextResponse.json(
+        {
+          exists: true,
+          recipient: {
+            name: recipient.name,
+            email: recipient.email,
+            isAlumni: recipient.isAlumni,
+            company: recipient.company.companyName,
+            emailLogs: recipient.emailLogs.map((log) => ({
+              sentAt: log.sentAt,
+              status: log.status,
+              jobPosition: log.jobPosition,
+            })),
+          },
+        },
+        { status: 200 },
+      );
+    }
+
+    // If not found, try to find a company by domain
+    const domain = email.split("@")[1];
+    let suggestedCompany = null;
+
+    if (
+      domain &&
+      ![
+        "gmail.com",
+        "yahoo.com",
+        "hotmail.com",
+        "outlook.com",
+        "icloud.com",
+        "protonmail.com",
+      ].includes(domain.toLowerCase())
+    ) {
+      const domainMatch = await prisma.recipient.findFirst({
+        where: {
+          email: {
+            endsWith: `@${domain}`,
+          },
+        },
+        include: {
+          company: true,
+        },
+      });
+
+      if (domainMatch) {
+        suggestedCompany = domainMatch.company.companyName;
+      }
     }
 
     return NextResponse.json(
       {
-        exists: true,
-        recipient: {
-          name: recipient.name,
-          email: recipient.email,
-          isAlumni: recipient.isAlumni,
-          company: recipient.company.companyName,
-          emailLogs: recipient.emailLogs.map((log) => ({
-            sentAt: log.sentAt,
-            status: log.status,
-            jobPosition: log.jobPosition,
-          })),
-        },
+        exists: false,
+        suggestedCompany,
       },
       { status: 200 },
     );

@@ -295,10 +295,14 @@ export default function Home() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
 
-    setEmailForm((prev) => ({
-      ...prev,
-      [id]: type === "checkbox" ? checked : value,
-    }));
+    setEmailForm((prev) => {
+      const newForm = {
+        ...prev,
+        [id]: type === "checkbox" ? checked : value,
+      };
+
+      return newForm;
+    });
 
     // Validate field on change if already touched
     if (type !== "checkbox" && touched[id as keyof typeof touched]) {
@@ -338,6 +342,14 @@ export default function Home() {
         });
       } else {
         setRecipientCheck({ exists: false, loading: false });
+        if (data.suggestedCompany) {
+          setEmailForm((prev) => {
+            if (!prev.company) {
+              return { ...prev, company: data.suggestedCompany };
+            }
+            return prev;
+          });
+        }
       }
     } catch (error) {
       console.error("Error checking recipient:", error);
@@ -403,10 +415,10 @@ export default function Home() {
         const data = await response.json();
         if (response.ok) {
           toast.success("Email Sent Successfully!");
-          // Reset only optional fields, keep recipient info for potential follow-up
+          // Smart Reset: Clear specific fields for next applicant at same company
           setEmailForm({
-            email: emailForm.email,
-            name: emailForm.name,
+            email: "",
+            name: "",
             company: emailForm.company,
             jobPosition: emailForm.jobPosition,
             isAlum: emailForm.isAlum,
@@ -559,13 +571,14 @@ Jeet Sharma`;
           scheduledDate: "",
           scheduledTime: "",
         });
+        // Smart Reset: Clear specific fields for next applicant at same company
         setEmailForm({
           email: "",
           name: "",
-          company: "",
-          jobPosition: "",
-          isAlum: false,
-          isRecruiter: false,
+          company: emailForm.company,
+          jobPosition: emailForm.jobPosition,
+          isAlum: emailForm.isAlum,
+          isRecruiter: emailForm.isRecruiter,
           tenureYears: "",
           personalMention: "",
         });
