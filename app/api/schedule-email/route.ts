@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
       personalMention,
       isFollowUp,
       scheduledFor,
+      customHtml,
     } = body;
 
     if (!scheduledFor) {
@@ -59,7 +60,13 @@ export async function POST(req: NextRequest) {
 
     console.log("Step 3: Building email template...");
     let html_body;
-    if (isFollowUp) {
+    if (customHtml) {
+      html_body = customHtml;
+      console.log(
+        "Using custom HTML from preview editor, length:",
+        html_body.length,
+      );
+    } else if (isFollowUp) {
       html_body = buildFollowUpTemplate({
         name,
         company,
@@ -95,7 +102,9 @@ export async function POST(req: NextRequest) {
         personalMention,
       });
     }
-    console.log("Template built successfully, length:", html_body.length);
+    if (!customHtml) {
+      console.log("Template built successfully, length:", html_body.length);
+    }
 
     const emailSubject = isFollowUp
       ? `Following up - ${jobPosition} at ${company}`

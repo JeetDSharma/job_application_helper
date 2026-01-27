@@ -213,6 +213,7 @@ export default function Home() {
     isOpen: false,
     emailHtml: "",
     emailSubject: "",
+    editedHtml: "",
   });
   const [scheduleModal, setScheduleModal] = useState({
     isOpen: false,
@@ -411,7 +412,10 @@ export default function Home() {
         const response = await fetch("/api/send-email", {
           headers: { Accept: "application/json" },
           method: "POST",
-          body: JSON.stringify({ ...emailForm }),
+          body: JSON.stringify({
+            ...emailForm,
+            customHtml: previewModal.editedHtml || undefined,
+          }),
         });
 
         const data = await response.json();
@@ -429,11 +433,21 @@ export default function Home() {
             personalMention: "",
           });
 
+          // Reset edited HTML for next email
+          setPreviewModal((prev) => ({
+            ...prev,
+            editedHtml: "",
+          }));
+
           // Smart Focus: Select username for quick editing
           const atIndex = emailForm.email.indexOf("@");
           if (atIndex > 0 && emailInputRef.current) {
             emailInputRef.current.focus();
-            emailInputRef.current.setSelectionRange(0, atIndex);
+            try {
+              emailInputRef.current.setSelectionRange(0, atIndex);
+            } catch (e) {
+              // setSelectionRange not supported on email input type
+            }
           }
 
           // Reset validation errors
@@ -509,7 +523,15 @@ export default function Home() {
       isOpen: true,
       emailHtml: html_body,
       emailSubject,
+      editedHtml: "",
     });
+  };
+
+  const handleHtmlChange = (html: string) => {
+    setPreviewModal((prev) => ({
+      ...prev,
+      editedHtml: html,
+    }));
   };
 
   const handleCopyEmailForInMail = () => {
@@ -571,6 +593,7 @@ Jeet Sharma`;
         body: JSON.stringify({
           ...emailForm,
           scheduledFor: scheduledDateTime.toISOString(),
+          customHtml: previewModal.editedHtml || undefined,
         }),
       });
 
@@ -593,6 +616,12 @@ Jeet Sharma`;
           personalMention: "",
         });
 
+        // Reset edited HTML for next email
+        setPreviewModal((prev) => ({
+          ...prev,
+          editedHtml: "",
+        }));
+
         // Smart Focus: Select username for quick editing
         const atIndex = emailForm.email.indexOf("@");
         if (atIndex > 0 && emailInputRef.current) {
@@ -600,7 +629,11 @@ Jeet Sharma`;
           setTimeout(() => {
             if (emailInputRef.current) {
               emailInputRef.current.focus();
-              emailInputRef.current.setSelectionRange(0, atIndex);
+              try {
+                emailInputRef.current.setSelectionRange(0, atIndex);
+              } catch (e) {
+                // setSelectionRange not supported on email input type
+              }
             }
           }, 100);
         }
@@ -666,6 +699,8 @@ Jeet Sharma`;
         emailHtml={previewModal.emailHtml}
         emailSubject={previewModal.emailSubject}
         recipientEmail={emailForm.email}
+        onHtmlChange={handleHtmlChange}
+        currentEditedHtml={previewModal.editedHtml}
       />
       <div className="min-h-screen flex justify-center items-center bg-gray-100">
         <div className="bg-white p-8 shadow-md rounded-lg w-lg">

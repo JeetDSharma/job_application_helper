@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     tenureYears,
     personalMention,
     isFollowUp,
+    customHtml,
   } = body; // Get new fields
   console.log(body);
 
@@ -75,9 +76,12 @@ export async function POST(req: NextRequest) {
   const resumePath = path.join(process.cwd(), "public", "resume.pdf");
   const resumeFile = fs.readFileSync(resumePath);
 
-  // Decide which template to use
+  // Use custom HTML if provided, otherwise generate from template
   let html_body;
-  if (isFollowUp) {
+  if (customHtml) {
+    html_body = customHtml;
+    console.log("Using custom HTML from preview editor");
+  } else if (isFollowUp) {
     html_body = buildFollowUpTemplate({
       name,
       company,
