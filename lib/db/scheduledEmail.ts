@@ -13,6 +13,7 @@ type CreateScheduledEmail = {
   isRecruiter?: boolean;
   tenureYears?: number;
   personalMention?: string;
+  resumeFile?: string;
 };
 
 type UpdateScheduledEmail = {
@@ -39,6 +40,7 @@ export async function createScheduledEmail(
       isRecruiter: data.isRecruiter || false,
       tenureYears: data.tenureYears,
       personalMention: data.personalMention,
+      resumeFile: data.resumeFile || "resume.pdf",
     },
     select: {
       id: true,

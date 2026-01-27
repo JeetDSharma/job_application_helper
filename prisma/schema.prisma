@@ -67,6 +67,7 @@ model ScheduledEmail {
   isRecruiter     Boolean   @default(false)
   tenureYears     Int?
   personalMention String?
+  resumeFile      String    @default("resume.pdf")
   status          String    @default("SCHEDULED")
   sentAt          DateTime?
   emailLogId      String?

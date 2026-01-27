@@ -51,8 +51,34 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const resumePath = path.join(process.cwd(), "public", "resume.pdf");
-    const resumeFile = fs.readFileSync(resumePath);
+    // Get resume file from scheduled email, default to resume.pdf
+    const resumeFile = scheduledEmail.resumeFile || "resume.pdf";
+
+    // Validate resume file selection for security
+    const ALLOWED_RESUMES = ["resume.pdf", "resume_blockchain.pdf"];
+    if (!ALLOWED_RESUMES.includes(resumeFile)) {
+      await updateEmailStatus({ emailLogId, status: "FAILED" });
+      return NextResponse.json(
+        { error: "Invalid resume file in scheduled email" },
+        { status: 400 },
+      );
+    }
+
+    const resumePath = path.join(process.cwd(), "public", resumeFile);
+
+    // Check if file exists
+    if (!fs.existsSync(resumePath)) {
+      await updateEmailStatus({ emailLogId, status: "FAILED" });
+      return NextResponse.json(
+        { error: `Resume file not found: ${resumeFile}` },
+        { status: 400 },
+      );
+    }
+
+    const resumeBuffer = fs.readFileSync(resumePath);
+
+    // Rename attachment to professional filename
+    const attachmentName = RESUME_NAME;
 
     const mailOptions = {
       from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
@@ -61,8 +87,8 @@ export async function POST(req: NextRequest) {
       html: scheduledEmail.htmlBody,
       attachments: [
         {
-          filename: RESUME_NAME,
-          content: resumeFile,
+          filename: attachmentName,
+          content: resumeBuffer,
           contentType: "application/pdf",
         },
       ],

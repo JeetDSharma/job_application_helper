@@ -205,6 +205,7 @@ export default function Home() {
     isRecruiter: false,
     tenureYears: "",
     personalMention: "",
+    resumeFile: "resume.pdf",
   });
   const emailInputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -295,8 +296,12 @@ export default function Home() {
     setFormErrors((prev) => ({ ...prev, [fieldName]: error }));
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value, type, checked } = e.target;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { id, value } = e.target;
+    const type = "type" in e.target ? e.target.type : "select";
+    const checked = "checked" in e.target ? e.target.checked : false;
 
     setEmailForm((prev) => {
       const newForm = {
@@ -431,6 +436,7 @@ export default function Home() {
             isRecruiter: emailForm.isRecruiter,
             tenureYears: "",
             personalMention: "",
+            resumeFile: emailForm.resumeFile,
           });
 
           // Reset edited HTML for next email
@@ -614,6 +620,7 @@ Jeet Sharma`;
           isRecruiter: emailForm.isRecruiter,
           tenureYears: "",
           personalMention: "",
+          resumeFile: emailForm.resumeFile,
         });
 
         // Reset edited HTML for next email
@@ -937,6 +944,28 @@ Jeet Sharma`;
                 className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
                 placeholder="Mention something relevant from their LinkedIn"
               />
+            </div>
+
+            {/* Resume Selection */}
+            <div className="flex flex-col">
+              <label
+                htmlFor="resumeFile"
+                className="text-sm font-medium text-gray-700 flex items-center gap-2"
+              >
+                📄 Resume File
+              </label>
+              <select
+                id="resumeFile"
+                name="resumeFile"
+                value={emailForm.resumeFile}
+                onChange={handleChange}
+                className="border border-gray-300 mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500 bg-white"
+              >
+                <option value="resume.pdf">Default Resume (resume.pdf)</option>
+                <option value="resume_blockchain.pdf">
+                  Blockchain Resume (resume_blockchain.pdf)
+                </option>
+              </select>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 p-3 bg-gray-50 rounded-md border border-gray-200">

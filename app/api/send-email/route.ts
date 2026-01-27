@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
     personalMention,
     isFollowUp,
     customHtml,
+    resumeFile = "resume.pdf",
   } = body; // Get new fields
   console.log(body);
 
@@ -73,8 +74,30 @@ export async function POST(req: NextRequest) {
       pass: process.env.SMTP_PASS,
     },
   });
-  const resumePath = path.join(process.cwd(), "public", "resume.pdf");
-  const resumeFile = fs.readFileSync(resumePath);
+
+  // Validate resume file selection for security
+  const ALLOWED_RESUMES = ["resume.pdf", "resume_blockchain.pdf"];
+  if (!ALLOWED_RESUMES.includes(resumeFile)) {
+    return NextResponse.json(
+      { error: "Invalid resume file selected" },
+      { status: 400 },
+    );
+  }
+
+  const resumePath = path.join(process.cwd(), "public", resumeFile);
+
+  // Check if file exists
+  if (!fs.existsSync(resumePath)) {
+    return NextResponse.json(
+      { error: `Resume file not found: ${resumeFile}` },
+      { status: 400 },
+    );
+  }
+
+  const resumeBuffer = fs.readFileSync(resumePath);
+
+  // Rename attachment to professional filename
+  const attachmentName = RESUME_NAME;
 
   // Use custom HTML if provided, otherwise generate from template
   let html_body;
@@ -124,8 +147,8 @@ export async function POST(req: NextRequest) {
     html: html_body,
     attachments: [
       {
-        filename: RESUME_NAME,
-        content: resumeFile,
+        filename: attachmentName,
+        content: resumeBuffer,
         contentType: "application/pdf",
       },
     ],

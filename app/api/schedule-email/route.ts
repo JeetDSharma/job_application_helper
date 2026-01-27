@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       isFollowUp,
       scheduledFor,
       customHtml,
+      resumeFile = "resume.pdf",
     } = body;
 
     if (!scheduledFor) {
@@ -126,6 +127,7 @@ export async function POST(req: NextRequest) {
       isRecruiter,
       tenureYears: tenureYears ? Number(tenureYears) : undefined,
       personalMention: personalMention || undefined,
+      resumeFile,
     });
     console.log("Scheduled email created with ID:", scheduledEmailId);
 
