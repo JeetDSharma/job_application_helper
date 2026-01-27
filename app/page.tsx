@@ -23,6 +23,7 @@ import {
   FaChartLine,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
+import QuickActionModal from "@/components/QuickActionModal";
 import { buildAlumTemplate } from "@/templates/alumTemplate";
 import { buildEmailTemplate } from "@/templates/emailTemplateNew";
 import { buildRecruiterTemplate } from "@/templates/recruiterTemplate";
@@ -222,6 +223,12 @@ export default function Home() {
     scheduledTime: "",
   });
   const [isScheduling, setIsScheduling] = useState(false);
+  const [quickActionModal, setQuickActionModal] = useState({
+    isOpen: false,
+    emailLogId: "",
+    recipientName: "",
+    companyName: "",
+  });
   const [recipientCheck, setRecipientCheck] = useState<{
     exists: boolean;
     loading: boolean;
@@ -426,6 +433,16 @@ export default function Home() {
         const data = await response.json();
         if (response.ok) {
           toast.success("Email Sent Successfully!");
+
+          // Show Quick Action Modal
+          if (data.emailLogId) {
+            setQuickActionModal({
+              isOpen: true,
+              emailLogId: data.emailLogId,
+              recipientName: emailForm.name,
+              companyName: emailForm.company,
+            });
+          }
           // Smart Reset: Clear specific fields for next applicant at same company
           setEmailForm({
             email: emailForm.email,
@@ -708,6 +725,16 @@ Jeet Sharma`;
         recipientEmail={emailForm.email}
         onHtmlChange={handleHtmlChange}
         currentEditedHtml={previewModal.editedHtml}
+      />
+      <QuickActionModal
+        isOpen={quickActionModal.isOpen}
+        onClose={() =>
+          setQuickActionModal({ ...quickActionModal, isOpen: false })
+        }
+        emailLogId={quickActionModal.emailLogId}
+        recipientName={quickActionModal.recipientName}
+        companyName={quickActionModal.companyName}
+        onUpdate={() => {}}
       />
       <div className="min-h-screen flex justify-center items-center bg-gray-100">
         <div className="bg-white p-8 shadow-md rounded-lg w-lg">

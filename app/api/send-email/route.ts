@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: "Email Sent Successfully!" },
+      { message: "Email Sent Successfully!", emailLogId },
       { status: 200 },
     );
   } catch (err) {

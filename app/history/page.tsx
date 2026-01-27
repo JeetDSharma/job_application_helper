@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
+import ResponseTypeModal from "@/components/ResponseTypeModal";
 import {
   FaCheckCircle,
   FaTimesCircle,
@@ -61,6 +62,9 @@ export default function EmailHistoryPage() {
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [followUpDate, setFollowUpDate] = useState("");
   const [sendingFollowUp, setSendingFollowUp] = useState<string | null>(null);
+  const [showResponseTypeModal, setShowResponseTypeModal] = useState(false);
+  const [selectedEmailForResponse, setSelectedEmailForResponse] =
+    useState<EmailLog | null>(null);
 
   const fetchEmailLogs = useCallback(async () => {
     setLoading(true);
@@ -115,6 +119,31 @@ export default function EmailHistoryPage() {
   useEffect(() => {
     fetchEmailLogs();
   }, [fetchEmailLogs]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only handle shortcuts when no modal is open and not typing in input
+      if (
+        showNotesModal ||
+        showFollowUpModal ||
+        showResponseTypeModal ||
+        (e.target as HTMLElement).tagName === "INPUT" ||
+        (e.target as HTMLElement).tagName === "TEXTAREA" ||
+        (e.target as HTMLElement).tagName === "SELECT"
+      ) {
+        return;
+      }
+
+      // Shortcuts disabled for now - can be enabled with selected row state
+      // 'r' → Mark as Responded
+      // 'n' → Add Note
+      // 'f' → Schedule Follow-up
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [showNotesModal, showFollowUpModal, showResponseTypeModal]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -286,6 +315,22 @@ export default function EmailHistoryPage() {
   return (
     <>
       <Toaster position="top-right" />
+      {selectedEmailForResponse && (
+        <ResponseTypeModal
+          isOpen={showResponseTypeModal}
+          onClose={() => {
+            setShowResponseTypeModal(false);
+            setSelectedEmailForResponse(null);
+          }}
+          emailLog={{
+            id: selectedEmailForResponse.id,
+            recipientName: selectedEmailForResponse.recipientName,
+            companyName: selectedEmailForResponse.companyName,
+            responseType: selectedEmailForResponse.responseType,
+          }}
+          onUpdate={fetchEmailLogs}
+        />
+      )}
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -573,21 +618,19 @@ export default function EmailHistoryPage() {
                               <FaEdit />
                             </button>
                             <button
-                              onClick={() =>
-                                handleToggleResponse(
-                                  log.id,
-                                  log.responseReceived,
-                                )
-                              }
+                              onClick={() => {
+                                setSelectedEmailForResponse(log);
+                                setShowResponseTypeModal(true);
+                              }}
                               className={`p-2 rounded transition ${
                                 log.responseReceived
                                   ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
                                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                               }`}
                               title={
-                                log.responseReceived
-                                  ? "Mark no response"
-                                  : "Mark response received"
+                                log.responseType
+                                  ? `Response: ${log.responseType}`
+                                  : "Update response status"
                               }
                             >
                               <FaReply />
