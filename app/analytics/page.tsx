@@ -13,7 +13,15 @@ import {
   FaGraduationCap,
   FaTrophy,
   FaCalendarAlt,
+  FaFilter,
+  FaThumbsUp,
+  FaThumbsDown,
+  FaExclamation,
+  FaInfoCircle,
 } from "react-icons/fa";
+import { RESPONSE_CATEGORIES } from "@/lib/constants";
+import ConversionFunnel from "@/components/ConversionFunnel";
+import ResponseQualityBreakdown from "@/components/ResponseQualityBreakdown";
 
 type AnalyticsData = {
   overview: {
@@ -22,6 +30,24 @@ type AnalyticsData = {
     failedEmails: number;
     responseCount: number;
     responseRate: string;
+    avgResponseTime: string;
+  };
+  responseTypeBreakdown: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    special: number;
+    unspecified: number;
+  };
+  responsesByType: Array<{
+    type: string;
+    count: number;
+  }>;
+  funnelStats: {
+    emailsSent: number;
+    responsesReceived: number;
+    positiveResponses: number;
+    interviews: number;
   };
   templateStats: Array<{
     name: string;
@@ -29,7 +55,9 @@ type AnalyticsData = {
     sent: number;
     responses: number;
     failed: number;
+    positiveResponses: number;
     responseRate: string;
+    positiveRate: string;
   }>;
   topCompanies: Array<{
     company: string;
@@ -37,7 +65,9 @@ type AnalyticsData = {
     sent: number;
     responses: number;
     failed: number;
+    positiveResponses: number;
     responseRate: string;
+    positiveRate: string;
   }>;
   timelineData: Array<{
     date: string;
@@ -303,7 +333,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Overview Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
           <StatCard
             icon={<FaEnvelope />}
             label="Total Emails"
@@ -334,6 +364,22 @@ export default function AnalyticsPage() {
             value={`${analytics.overview.responseRate}%`}
             color="text-indigo-600"
           />
+          <StatCard
+            icon={<FaClock />}
+            label="Avg Response Time"
+            value={`${analytics.overview.avgResponseTime}d`}
+            subtext="days to respond"
+            color="text-purple-600"
+          />
+        </div>
+
+        {/* Conversion Funnel & Response Quality */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <ConversionFunnel data={analytics.funnelStats} />
+          <ResponseQualityBreakdown
+            breakdown={analytics.responseTypeBreakdown}
+            topTypes={analytics.responsesByType}
+          />
         </div>
 
         {/* Timeline */}
@@ -359,11 +405,19 @@ export default function AnalyticsPage() {
                     <span className="font-semibold text-gray-800">
                       {template.name}
                     </span>
-                    <span className="text-sm font-bold text-indigo-600">
-                      {template.responseRate}% response rate
-                    </span>
+                    <div className="flex gap-2">
+                      <span className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded font-bold">
+                        {template.responseRate}% response
+                      </span>
+                      {template.positiveResponses > 0 && (
+                        <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-bold flex items-center gap-1">
+                          <FaThumbsUp className="text-xs" />{" "}
+                          {template.positiveRate}%
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-sm">
+                  <div className="grid grid-cols-4 gap-2 text-xs">
                     <div>
                       <span className="text-gray-600">Sent:</span>{" "}
                       <span className="font-medium text-green-600">
@@ -374,6 +428,12 @@ export default function AnalyticsPage() {
                       <span className="text-gray-600">Responses:</span>{" "}
                       <span className="font-medium text-blue-600">
                         {template.responses}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Positive:</span>{" "}
+                      <span className="font-medium text-green-700">
+                        {template.positiveResponses}
                       </span>
                     </div>
                     <div>
@@ -514,7 +574,13 @@ export default function AnalyticsPage() {
                     Responses
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">
+                    Positive
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">
                     Response Rate
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">
+                    Quality
                   </th>
                 </tr>
               </thead>
@@ -536,10 +602,23 @@ export default function AnalyticsPage() {
                     <td className="px-4 py-3 text-blue-600 font-medium">
                       {company.responses}
                     </td>
+                    <td className="px-4 py-3 text-green-700 font-medium">
+                      {company.positiveResponses}
+                    </td>
                     <td className="px-4 py-3">
                       <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">
                         {company.responseRate}%
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {company.positiveResponses > 0 ? (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
+                          <FaThumbsUp className="text-xs" />{" "}
+                          {company.positiveRate}%
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">—</span>
+                      )}
                     </td>
                   </tr>
                 ))}

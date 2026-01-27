@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@/app/generated/prisma";
+import { RESPONSE_CATEGORIES } from "@/lib/constants";
 
 const prisma = new PrismaClient();
 
@@ -201,6 +202,129 @@ export async function GET() {
       },
     };
 
+    // Response Type Breakdown
+    const responseTypeBreakdown = {
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      special: 0,
+      unspecified: 0,
+    };
+
+    const responsesByType: Record<string, number> = {};
+
+    emailLogs.forEach((log) => {
+      if (log.responseReceived && log.responseType) {
+        responsesByType[log.responseType] =
+          (responsesByType[log.responseType] || 0) + 1;
+
+        // Categorize by sentiment
+        let categorized = false;
+        for (const [category, data] of Object.entries(RESPONSE_CATEGORIES)) {
+          if (data.types.some((t: string) => t === log.responseType)) {
+            responseTypeBreakdown[
+              category.toLowerCase() as keyof typeof responseTypeBreakdown
+            ]++;
+            categorized = true;
+            break;
+          }
+        }
+        if (!categorized) {
+          responseTypeBreakdown.unspecified++;
+        }
+      } else if (log.responseReceived) {
+        responseTypeBreakdown.unspecified++;
+      }
+    });
+
+    // Conversion Funnel
+    const funnelStats = {
+      emailsSent: sentEmails,
+      responsesReceived: responseCount,
+      positiveResponses: responseTypeBreakdown.positive,
+      interviews: emailLogs.filter(
+        (log) =>
+          log.responseType === "Interview Scheduled" ||
+          log.responseType === "Networking Call Scheduled",
+      ).length,
+    };
+
+    // Average Response Time
+    const responseTimes = emailLogs
+      .filter((log) => log.responseReceived && log.responseDate)
+      .map((log) => {
+        const sentDate = new Date(log.sentAt);
+        const responseDate = new Date(log.responseDate!);
+        return (
+          (responseDate.getTime() - sentDate.getTime()) / (1000 * 60 * 60 * 24)
+        ); // days
+      });
+
+    const avgResponseTime =
+      responseTimes.length > 0
+        ? (
+            responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+          ).toFixed(1)
+        : "0";
+
+    // Company Performance with Response Quality
+    const companyQualityStats = Object.entries(companyStats).map(
+      ([company, stats]) => {
+        const companyLogs = emailLogs.filter(
+          (log) => log.recipient.company.companyName === company,
+        );
+        const positiveResponses = companyLogs.filter((log) => {
+          if (!log.responseType) return false;
+          return RESPONSE_CATEGORIES.POSITIVE.types.some(
+            (t: string) => t === log.responseType,
+          );
+        }).length;
+
+        return {
+          company,
+          ...stats,
+          positiveResponses,
+          responseRate:
+            stats.sent > 0
+              ? ((stats.responses / stats.sent) * 100).toFixed(1)
+              : "0",
+          positiveRate:
+            stats.responses > 0
+              ? ((positiveResponses / stats.responses) * 100).toFixed(1)
+              : "0",
+        };
+      },
+    );
+
+    // Template Performance with Response Quality
+    const templateQualityStats = Object.entries(templateStats).map(
+      ([name, stats]) => {
+        const templateLogs = emailLogs.filter(
+          (log) => (log.templateUsed || "UNKNOWN") === name,
+        );
+        const positiveResponses = templateLogs.filter((log) => {
+          if (!log.responseType) return false;
+          return RESPONSE_CATEGORIES.POSITIVE.types.some(
+            (t: string) => t === log.responseType,
+          );
+        }).length;
+
+        return {
+          name,
+          ...stats,
+          positiveResponses,
+          responseRate:
+            stats.sent > 0
+              ? ((stats.responses / stats.sent) * 100).toFixed(1)
+              : "0",
+          positiveRate:
+            stats.responses > 0
+              ? ((positiveResponses / stats.responses) * 100).toFixed(1)
+              : "0",
+        };
+      },
+    );
+
     return NextResponse.json({
       overview: {
         totalEmails,
@@ -208,16 +332,17 @@ export async function GET() {
         failedEmails,
         responseCount,
         responseRate,
+        avgResponseTime,
       },
-      templateStats: Object.entries(templateStats).map(([name, stats]) => ({
-        name,
-        ...stats,
-        responseRate:
-          stats.sent > 0
-            ? ((stats.responses / stats.sent) * 100).toFixed(1)
-            : "0",
-      })),
-      topCompanies,
+      responseTypeBreakdown,
+      responsesByType: Object.entries(responsesByType)
+        .map(([type, count]) => ({ type, count }))
+        .sort((a, b) => b.count - a.count),
+      funnelStats,
+      templateStats: templateQualityStats,
+      topCompanies: companyQualityStats
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10),
       timelineData,
       dayOfWeekData,
       hourData,
