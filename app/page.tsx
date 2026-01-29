@@ -992,6 +992,9 @@ Jeet Sharma`;
                 <option value="resume_blockchain.pdf">
                   Blockchain Resume (resume_blockchain.pdf)
                 </option>
+                <option value="resume_infra.pdf">
+                  Infra Resume (resume_infra.pdf)
+                </option>
               </select>
             </div>
 

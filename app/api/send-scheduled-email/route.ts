@@ -55,7 +55,11 @@ export async function POST(req: NextRequest) {
     const resumeFile = scheduledEmail.resumeFile || "resume.pdf";
 
     // Validate resume file selection for security
-    const ALLOWED_RESUMES = ["resume.pdf", "resume_blockchain.pdf"];
+    const ALLOWED_RESUMES = [
+      "resume.pdf",
+      "resume_blockchain.pdf",
+      "resume_infra.pdf",
+    ];
     if (!ALLOWED_RESUMES.includes(resumeFile)) {
       await updateEmailStatus({ emailLogId, status: "FAILED" });
       return NextResponse.json(

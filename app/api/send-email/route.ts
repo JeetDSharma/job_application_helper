@@ -76,7 +76,11 @@ export async function POST(req: NextRequest) {
   });
 
   // Validate resume file selection for security
-  const ALLOWED_RESUMES = ["resume.pdf", "resume_blockchain.pdf"];
+  const ALLOWED_RESUMES = [
+    "resume.pdf",
+    "resume_blockchain.pdf",
+    "resume_infra.pdf",
+  ];
   if (!ALLOWED_RESUMES.includes(resumeFile)) {
     return NextResponse.json(
       { error: "Invalid resume file selected" },
