@@ -18,6 +18,8 @@ export async function upsertRecipient({
   const response = await prisma.recipient.upsert({
     where: { email },
     update: {
+      name: normalizedName,
+      companyId,
       isAlumni,
     },
     create: { email, name: normalizedName, isAlumni, companyId },

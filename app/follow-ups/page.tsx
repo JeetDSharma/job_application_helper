@@ -18,6 +18,7 @@ import {
   FaHistory,
   FaInbox,
   FaTimes,
+  FaEdit,
 } from "react-icons/fa";
 import PreviewModal from "@/components/PreviewModal";
 import { buildFollowUpTemplate } from "@/templates/followUpTemplate";
@@ -72,6 +73,168 @@ type CategorizedFollowUps = {
   thisWeek: FollowUp[];
   later: FollowUp[];
 };
+
+function EditScheduledEmailModal({
+  isOpen,
+  onClose,
+  email,
+  onSave,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  email: ScheduledEmail | null;
+  onSave: (data: {
+    id: string;
+    recipientName: string;
+    recipientEmail: string;
+    companyName: string;
+    jobPosition: string;
+    scheduledFor: string;
+  }) => Promise<void>;
+}) {
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [jobPosition, setJobPosition] = useState("");
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (email) {
+      setRecipientName(email.recipient.name);
+      setRecipientEmail(email.recipient.email);
+      setCompanyName(email.recipient.company.companyName);
+      setJobPosition(email.jobPosition);
+      const date = new Date(email.scheduledFor);
+      const localIso = new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000,
+      )
+        .toISOString()
+        .slice(0, 16);
+      setScheduledFor(localIso);
+    }
+  }, [email]);
+
+  if (!isOpen || !email) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await onSave({
+        id: email.id,
+        recipientName,
+        recipientEmail,
+        companyName,
+        jobPosition,
+        scheduledFor: new Date(scheduledFor).toISOString(),
+      });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+        <div className="bg-slate-900 px-5 py-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <FaEdit /> Edit Scheduled Email
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-white transition-colors"
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Recipient Name
+            </label>
+            <input
+              type="text"
+              value={recipientName}
+              onChange={(e) => setRecipientName(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Recipient Email
+            </label>
+            <input
+              type="email"
+              value={recipientEmail}
+              onChange={(e) => setRecipientEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Company
+            </label>
+            <input
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Job Position
+            </label>
+            <input
+              type="text"
+              value={jobPosition}
+              onChange={(e) => setJobPosition(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Scheduled For
+            </label>
+            <input
+              type="datetime-local"
+              value={scheduledFor}
+              onChange={(e) => setScheduledFor(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 border border-slate-300 bg-white hover:bg-slate-50 rounded-lg text-sm font-semibold text-slate-700 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                saving
+                  ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
+              }`}
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 function PendingFollowUpCard({
   followUp,
@@ -289,6 +452,7 @@ function ScheduledEmailCard({
   email,
   onSend,
   onPreview,
+  onEdit,
   onCancel,
   sendingId,
   cancellingId,
@@ -300,6 +464,7 @@ function ScheduledEmailCard({
   email: ScheduledEmail;
   onSend: (email: ScheduledEmail) => void;
   onPreview: (email: ScheduledEmail) => void;
+  onEdit: (email: ScheduledEmail) => void;
   onCancel: (email: ScheduledEmail) => void;
   sendingId: string | null;
   cancellingId: string | null;
@@ -388,6 +553,13 @@ function ScheduledEmailCard({
           >
             <FaEye className="text-xs" />
             <span className="text-xs">Preview</span>
+          </button>
+          <button
+            onClick={() => onEdit(email)}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-blue-300 bg-white hover:bg-blue-50 hover:border-blue-400 rounded-md text-blue-700 font-medium transition-all"
+          >
+            <FaEdit className="text-xs" />
+            <span className="text-xs">Edit</span>
           </button>
           <button
             onClick={() => onCancel(email)}
@@ -589,6 +761,7 @@ function ScheduledEmailSections({
   categorized,
   onSend,
   onPreview,
+  onEdit,
   onCancel,
   sendingId,
   cancellingId,
@@ -599,6 +772,7 @@ function ScheduledEmailSections({
   categorized: CategorizedScheduledEmails;
   onSend: (email: ScheduledEmail) => void;
   onPreview: (email: ScheduledEmail) => void;
+  onEdit: (email: ScheduledEmail) => void;
   onCancel: (email: ScheduledEmail) => void;
   sendingId: string | null;
   cancellingId: string | null;
@@ -628,6 +802,7 @@ function ScheduledEmailSections({
                 email={email}
                 onSend={onSend}
                 onPreview={onPreview}
+                onEdit={onEdit}
                 onCancel={onCancel}
                 sendingId={sendingId}
                 cancellingId={cancellingId}
@@ -661,6 +836,7 @@ function ScheduledEmailSections({
                 email={email}
                 onSend={onSend}
                 onPreview={onPreview}
+                onEdit={onEdit}
                 onCancel={onCancel}
                 sendingId={sendingId}
                 cancellingId={cancellingId}
@@ -694,6 +870,7 @@ function ScheduledEmailSections({
                 email={email}
                 onSend={onSend}
                 onPreview={onPreview}
+                onEdit={onEdit}
                 onCancel={onCancel}
                 sendingId={sendingId}
                 cancellingId={cancellingId}
@@ -727,6 +904,7 @@ function ScheduledEmailSections({
                 email={email}
                 onSend={onSend}
                 onPreview={onPreview}
+                onEdit={onEdit}
                 onCancel={onCancel}
                 sendingId={sendingId}
                 cancellingId={cancellingId}
@@ -769,6 +947,10 @@ export default function FollowUps() {
     emailSubject: "",
     recipientEmail: "",
   });
+  const [editModal, setEditModal] = useState<{
+    isOpen: boolean;
+    email: ScheduledEmail | null;
+  }>({ isOpen: false, email: null });
 
   useEffect(() => {
     fetchFollowUps();
@@ -1043,6 +1225,46 @@ export default function FollowUps() {
     }
   };
 
+  const handleEditScheduledEmail = (email: ScheduledEmail) => {
+    setEditModal({ isOpen: true, email });
+  };
+
+  const handleSaveScheduledEmail = async (data: {
+    id: string;
+    recipientName: string;
+    recipientEmail: string;
+    companyName: string;
+    jobPosition: string;
+    scheduledFor: string;
+  }) => {
+    try {
+      const response = await fetch("/api/update-scheduled-email", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: data.id,
+          recipientName: data.recipientName,
+          recipientEmail: data.recipientEmail,
+          companyName: data.companyName,
+          jobPosition: data.jobPosition,
+          scheduledFor: data.scheduledFor,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Scheduled email updated!");
+        fetchScheduledEmails();
+      } else {
+        toast.error("Failed to update scheduled email");
+      }
+    } catch (error) {
+      console.error("Error updating scheduled email:", error);
+      toast.error("Failed to update scheduled email");
+    }
+  };
+
   const totalPending = pendingFollowUps.length;
   const totalSent = sentFollowUps.length;
   const totalScheduled =
@@ -1194,6 +1416,7 @@ export default function FollowUps() {
                     categorized={scheduledEmails}
                     onSend={handleSendScheduledEmail}
                     onPreview={handlePreviewScheduledEmail}
+                    onEdit={handleEditScheduledEmail}
                     onCancel={handleCancelScheduledEmail}
                     sendingId={sendingScheduledId}
                     cancellingId={cancellingId}
@@ -1223,6 +1446,12 @@ export default function FollowUps() {
           </div>
         </div>
       </div>
+      <EditScheduledEmailModal
+        isOpen={editModal.isOpen}
+        onClose={() => setEditModal({ isOpen: false, email: null })}
+        email={editModal.email}
+        onSave={handleSaveScheduledEmail}
+      />
     </>
   );
 }

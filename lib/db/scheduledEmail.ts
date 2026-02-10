@@ -22,6 +22,8 @@ type UpdateScheduledEmail = {
   subject?: string;
   htmlBody?: string;
   status?: string;
+  recipientId?: string;
+  jobPosition?: string;
 };
 
 export async function createScheduledEmail(
@@ -86,6 +88,8 @@ export async function updateScheduledEmail(data: UpdateScheduledEmail) {
   if (data.subject) updateData.subject = data.subject;
   if (data.htmlBody) updateData.htmlBody = data.htmlBody;
   if (data.status) updateData.status = data.status;
+  if (data.recipientId) updateData.recipientId = data.recipientId;
+  if (data.jobPosition) updateData.jobPosition = data.jobPosition;
 
   return await prisma.scheduledEmail.update({
     where: { id: data.id },
