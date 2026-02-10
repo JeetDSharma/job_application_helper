@@ -37,10 +37,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Calculate follow-up date (6 days from now) for initial emails
+    let followUpDate: Date | undefined = undefined;
+    if (!scheduledEmail.isFollowUp) {
+      followUpDate = new Date();
+      followUpDate.setDate(followUpDate.getDate() + 6);
+    }
+
     const emailLogId = await insertEmailLog({
       recipientId: scheduledEmail.recipientId,
       jobPosition: scheduledEmail.jobPosition,
       templateUsed: scheduledEmail.templateUsed,
+      followUpScheduledFor: followUpDate,
     });
 
     const transporter = nodemailer.createTransport({

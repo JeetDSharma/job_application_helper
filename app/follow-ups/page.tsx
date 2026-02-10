@@ -941,6 +941,12 @@ export default function FollowUps() {
     null,
   );
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [isSendingAll, setIsSendingAll] = useState(false);
+  const [sendAllProgress, setSendAllProgress] = useState({
+    sent: 0,
+    total: 0,
+    failed: 0,
+  });
   const [previewModal, setPreviewModal] = useState({
     isOpen: false,
     emailHtml: "",
@@ -1188,6 +1194,73 @@ export default function FollowUps() {
     }
   };
 
+  const handleSendAllScheduled = async () => {
+    const allEmails = [
+      ...scheduledEmails.overdue,
+      ...scheduledEmails.today,
+      ...scheduledEmails.thisWeek,
+      ...scheduledEmails.later,
+    ];
+
+    if (allEmails.length === 0) return;
+
+    const confirmed = window.confirm(
+      `Send all ${allEmails.length} scheduled emails? They will be sent with a 3-second delay between each to avoid rate limiting.`,
+    );
+    if (!confirmed) return;
+
+    setIsSendingAll(true);
+    setSendAllProgress({ sent: 0, total: allEmails.length, failed: 0 });
+
+    let sent = 0;
+    let failed = 0;
+
+    for (let i = 0; i < allEmails.length; i++) {
+      const email = allEmails[i];
+      setSendingScheduledId(email.id);
+
+      try {
+        const response = await fetch("/api/send-scheduled-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scheduledEmailId: email.id }),
+        });
+
+        if (response.ok) {
+          sent++;
+          toast.success(
+            `Sent ${sent}/${allEmails.length}: ${email.recipient.name}`,
+          );
+        } else {
+          failed++;
+          toast.error(`Failed: ${email.recipient.name}`);
+        }
+      } catch (error) {
+        console.error(`Error sending to ${email.recipient.email}:`, error);
+        failed++;
+        toast.error(`Failed: ${email.recipient.name}`);
+      }
+
+      setSendAllProgress({ sent, total: allEmails.length, failed });
+
+      // Rate limit: wait 3 seconds between emails (skip delay after last one)
+      if (i < allEmails.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
+    }
+
+    setSendingScheduledId(null);
+    setIsSendingAll(false);
+
+    if (failed === 0) {
+      toast.success(`All ${sent} emails sent successfully!`);
+    } else {
+      toast.error(`Done: ${sent} sent, ${failed} failed`);
+    }
+
+    fetchScheduledEmails();
+  };
+
   const handlePreviewScheduledEmail = (email: ScheduledEmail) => {
     setPreviewModal({
       isOpen: true,
@@ -1412,18 +1485,73 @@ export default function FollowUps() {
                     </p>
                   </div>
                 ) : (
-                  <ScheduledEmailSections
-                    categorized={scheduledEmails}
-                    onSend={handleSendScheduledEmail}
-                    onPreview={handlePreviewScheduledEmail}
-                    onEdit={handleEditScheduledEmail}
-                    onCancel={handleCancelScheduledEmail}
-                    sendingId={sendingScheduledId}
-                    cancellingId={cancellingId}
-                    formatDate={formatDate}
-                    formatTime={formatTime}
-                    getDaysUntil={getDaysUntil}
-                  />
+                  <div className="space-y-4">
+                    {/* Send All Button & Progress */}
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={handleSendAllScheduled}
+                        disabled={isSendingAll}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                          isSendingAll
+                            ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                            : "bg-slate-900 text-white hover:bg-slate-800 hover:shadow-md"
+                        }`}
+                      >
+                        <FaPaperPlane />
+                        {isSendingAll
+                          ? `Sending ${sendAllProgress.sent + sendAllProgress.failed}/${sendAllProgress.total}...`
+                          : `Send All (${totalScheduled})`}
+                      </button>
+                      {isSendingAll && (
+                        <span className="text-xs text-slate-500">
+                          ~
+                          {(sendAllProgress.total -
+                            sendAllProgress.sent -
+                            sendAllProgress.failed) *
+                            3}{" "}
+                          sec remaining
+                        </span>
+                      )}
+                    </div>
+                    {isSendingAll && (
+                      <div className="space-y-1.5">
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500 bg-emerald-500"
+                            style={{
+                              width: `${((sendAllProgress.sent + sendAllProgress.failed) / sendAllProgress.total) * 100}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-slate-500">
+                          <span>
+                            {sendAllProgress.sent} sent
+                            {sendAllProgress.failed > 0
+                              ? `, ${sendAllProgress.failed} failed`
+                              : ""}
+                          </span>
+                          <span>
+                            {sendAllProgress.total -
+                              sendAllProgress.sent -
+                              sendAllProgress.failed}{" "}
+                            remaining
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    <ScheduledEmailSections
+                      categorized={scheduledEmails}
+                      onSend={handleSendScheduledEmail}
+                      onPreview={handlePreviewScheduledEmail}
+                      onEdit={handleEditScheduledEmail}
+                      onCancel={handleCancelScheduledEmail}
+                      sendingId={sendingScheduledId}
+                      cancellingId={cancellingId}
+                      formatDate={formatDate}
+                      formatTime={formatTime}
+                      getDaysUntil={getDaysUntil}
+                    />
+                  </div>
                 )
               ) : sentFollowUps.length === 0 ? (
                 <div className="text-center py-12">
