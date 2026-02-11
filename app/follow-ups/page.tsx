@@ -952,6 +952,8 @@ export default function FollowUps() {
     emailHtml: "",
     emailSubject: "",
     recipientEmail: "",
+    editedHtml: "",
+    followUpId: "",
   });
   const [editModal, setEditModal] = useState<{
     isOpen: boolean;
@@ -1044,6 +1046,10 @@ export default function FollowUps() {
           isFollowUp: true,
           isAlum: false,
           isRecruiter: false,
+          customHtml:
+            previewModal.followUpId === followUp.id && previewModal.editedHtml
+              ? previewModal.editedHtml
+              : undefined,
         }),
       });
 
@@ -1112,7 +1118,16 @@ export default function FollowUps() {
       emailHtml,
       emailSubject,
       recipientEmail: followUp.recipient.email,
+      editedHtml: "",
+      followUpId: followUp.id,
     });
+  };
+
+  const handleHtmlChange = (html: string) => {
+    setPreviewModal((prev) => ({
+      ...prev,
+      editedHtml: html,
+    }));
   };
 
   const handleCopy = (followUp: FollowUp) => {
@@ -1267,6 +1282,8 @@ export default function FollowUps() {
       emailHtml: email.htmlBody,
       emailSubject: email.subject,
       recipientEmail: email.recipient.email,
+      editedHtml: "",
+      followUpId: "",
     });
   };
 
@@ -1355,6 +1372,8 @@ export default function FollowUps() {
         emailHtml={previewModal.emailHtml}
         emailSubject={previewModal.emailSubject}
         recipientEmail={previewModal.recipientEmail}
+        onHtmlChange={handleHtmlChange}
+        currentEditedHtml={previewModal.editedHtml}
       />
       <div className="min-h-screen bg-slate-50 p-4">
         <div className="max-w-6xl mx-auto">
