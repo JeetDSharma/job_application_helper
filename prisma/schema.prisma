@@ -48,6 +48,8 @@ model EmailLog {
   followUpScheduledFor DateTime?
   followUpCount        Int       @default(0)
   lastFollowUpDate     DateTime?
+  messageId            String?
+  emailSubject         String?
 
   @@index([followUpScheduledFor, responseReceived])
 }

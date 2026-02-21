@@ -7,7 +7,14 @@ import {
   getScheduledEmailById,
   markScheduledEmailAsSent,
 } from "@/lib/db/scheduledEmail";
-import { insertEmailLog, updateEmailStatus } from "@/lib/db/emailLog";
+import {
+  insertEmailLog,
+  updateEmailStatus,
+  updateMessageId,
+} from "@/lib/db/emailLog";
+import { PrismaClient } from "@/app/generated/prisma";
+
+const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,6 +56,7 @@ export async function POST(req: NextRequest) {
       jobPosition: scheduledEmail.jobPosition,
       templateUsed: scheduledEmail.templateUsed,
       followUpScheduledFor: followUpDate,
+      emailSubject: scheduledEmail.subject,
     });
 
     const transporter = nodemailer.createTransport({
@@ -92,24 +100,60 @@ export async function POST(req: NextRequest) {
     // Rename attachment to professional filename
     const attachmentName = RESUME_NAME;
 
-    const mailOptions = {
+    // Threading: look up original email for follow-ups
+    let threadSubject = scheduledEmail.subject;
+    let inReplyTo: string | undefined;
+    let references: string | undefined;
+
+    if (scheduledEmail.isFollowUp) {
+      // Find the most recent sent email to this recipient with a messageId
+      const originalEmail = await prisma.emailLog.findFirst({
+        where: {
+          recipientId: scheduledEmail.recipientId,
+          messageId: { not: null },
+          status: "SENT",
+        },
+        orderBy: { sentAt: "desc" },
+        select: { messageId: true, emailSubject: true },
+      });
+
+      if (originalEmail?.messageId) {
+        inReplyTo = originalEmail.messageId;
+        references = originalEmail.messageId;
+      }
+      if (originalEmail?.emailSubject) {
+        threadSubject = `Re: ${originalEmail.emailSubject}`;
+      }
+    }
+
+    const mailOptions: Record<string, unknown> = {
       from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
       to: scheduledEmail.recipient.email,
-      subject: scheduledEmail.subject,
+      subject: threadSubject,
       html: scheduledEmail.htmlBody,
-      attachments: [
-        {
-          filename: attachmentName,
-          content: resumeBuffer,
-          contentType: "application/pdf",
-        },
-      ],
+      ...(inReplyTo && { inReplyTo }),
+      ...(references && { references }),
+      ...(!scheduledEmail.isFollowUp && {
+        attachments: [
+          {
+            filename: attachmentName,
+            content: resumeBuffer,
+            contentType: "application/pdf",
+          },
+        ],
+      }),
     };
 
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
     console.log("Scheduled email sent");
 
     await updateEmailStatus({ emailLogId, status: "SENT" });
+
+    // Store the SMTP Message-ID for future threading
+    if (info.messageId) {
+      await updateMessageId(emailLogId, info.messageId);
+    }
+
     await markScheduledEmailAsSent(scheduledEmailId, emailLogId);
 
     return NextResponse.json(

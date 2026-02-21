@@ -6,6 +6,7 @@ type InsertEmailLog = {
   jobPosition: string;
   templateUsed?: string;
   followUpScheduledFor?: Date;
+  emailSubject?: string;
 };
 
 type UpdateEmailStatus = {
@@ -17,6 +18,7 @@ export async function insertEmailLog({
   jobPosition,
   templateUsed,
   followUpScheduledFor,
+  emailSubject,
 }: InsertEmailLog): Promise<string> {
   const response = await prisma.emailLog.create({
     data: {
@@ -24,6 +26,7 @@ export async function insertEmailLog({
       jobPosition,
       templateUsed,
       followUpScheduledFor,
+      emailSubject,
     },
     select: {
       id: true,
@@ -42,6 +45,23 @@ export async function updateEmailStatus({
     },
     data: {
       status: status,
+    },
+  });
+}
+
+export async function updateMessageId(emailLogId: string, messageId: string) {
+  return await prisma.emailLog.update({
+    where: { id: emailLogId },
+    data: { messageId },
+  });
+}
+
+export async function getOriginalEmailForThread(emailLogId: string) {
+  return await prisma.emailLog.findUnique({
+    where: { id: emailLogId },
+    select: {
+      messageId: true,
+      emailSubject: true,
     },
   });
 }

@@ -241,6 +241,7 @@ function PendingFollowUpCard({
   onSend,
   onPreview,
   onCopy,
+  onGmail,
   onMarkSent,
   sendingId,
   markingId,
@@ -252,6 +253,7 @@ function PendingFollowUpCard({
   onSend: (followUp: FollowUp) => void;
   onPreview: (followUp: FollowUp) => void;
   onCopy: (followUp: FollowUp) => void;
+  onGmail: (followUp: FollowUp) => void;
   onMarkSent: (followUp: FollowUp) => void;
   sendingId: string | null;
   markingId: string | null;
@@ -353,6 +355,13 @@ function PendingFollowUpCard({
           >
             <FaCopy className="text-xs" />
             <span className="text-xs">Copy</span>
+          </button>
+          <button
+            onClick={() => onGmail(followUp)}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-red-300 bg-white hover:bg-red-50 hover:border-red-400 rounded-md text-red-700 font-medium transition-all"
+          >
+            <FaEnvelope className="text-xs" />
+            <span className="text-xs">Gmail</span>
           </button>
           <button
             onClick={() => onMarkSent(followUp)}
@@ -604,6 +613,7 @@ function PendingFollowUpSections({
   onSend,
   onPreview,
   onCopy,
+  onGmail,
   onMarkSent,
   sendingId,
   markingId,
@@ -614,6 +624,7 @@ function PendingFollowUpSections({
   onSend: (followUp: FollowUp) => void;
   onPreview: (followUp: FollowUp) => void;
   onCopy: (followUp: FollowUp) => void;
+  onGmail: (followUp: FollowUp) => void;
   onMarkSent: (followUp: FollowUp) => void;
   sendingId: string | null;
   markingId: string | null;
@@ -643,6 +654,7 @@ function PendingFollowUpSections({
                 onSend={onSend}
                 onPreview={onPreview}
                 onCopy={onCopy}
+                onGmail={onGmail}
                 onMarkSent={onMarkSent}
                 sendingId={sendingId}
                 markingId={markingId}
@@ -676,6 +688,7 @@ function PendingFollowUpSections({
                 onSend={onSend}
                 onPreview={onPreview}
                 onCopy={onCopy}
+                onGmail={onGmail}
                 onMarkSent={onMarkSent}
                 sendingId={sendingId}
                 markingId={markingId}
@@ -709,6 +722,7 @@ function PendingFollowUpSections({
                 onSend={onSend}
                 onPreview={onPreview}
                 onCopy={onCopy}
+                onGmail={onGmail}
                 onMarkSent={onMarkSent}
                 sendingId={sendingId}
                 markingId={markingId}
@@ -742,6 +756,7 @@ function PendingFollowUpSections({
                 onSend={onSend}
                 onPreview={onPreview}
                 onCopy={onCopy}
+                onGmail={onGmail}
                 onMarkSent={onMarkSent}
                 sendingId={sendingId}
                 markingId={markingId}
@@ -983,6 +998,7 @@ export default function FollowUps() {
   const fetchScheduledEmails = async () => {
     try {
       const response = await fetch("/api/scheduled-emails");
+      if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setScheduledEmails(data);
     } catch (error) {
@@ -1046,6 +1062,7 @@ export default function FollowUps() {
           isFollowUp: true,
           isAlum: false,
           isRecruiter: false,
+          originalEmailLogId: followUp.id,
           customHtml:
             previewModal.followUpId === followUp.id && previewModal.editedHtml
               ? previewModal.editedHtml
@@ -1130,6 +1147,28 @@ export default function FollowUps() {
     }));
   };
 
+  const handleOpenGmail = (followUp: FollowUp) => {
+    const emailText = buildFollowUpTemplate({
+      name: followUp.recipient.name,
+      company: followUp.recipient.company.companyName,
+      jobPosition: followUp.jobPosition,
+      isRecruiter: false,
+    });
+
+    navigator.clipboard
+      .writeText(emailText)
+      .then(() => {
+        window.open(
+          `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(followUp.recipient.email)}`,
+          "_blank",
+        );
+        toast.success("Email copied & Gmail opened!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy email content");
+      });
+  };
+
   const handleCopy = (followUp: FollowUp) => {
     const emailHtml = buildFollowUpTemplate({
       name: followUp.recipient.name,
@@ -1170,7 +1209,13 @@ export default function FollowUps() {
         setPendingFollowUps(
           pendingFollowUps.filter((f) => f.id !== followUp.id),
         );
-        fetchFollowUps();
+        // Silent background refresh to sync sent tab (no loading flash)
+        fetch("/api/follow-ups")
+          .then((res) => res.json())
+          .then((data) => {
+            setSentFollowUps(data.sentFollowUps || []);
+          })
+          .catch(() => {});
       } else {
         toast.error("Failed to mark follow-up as sent");
       }
@@ -1485,6 +1530,7 @@ export default function FollowUps() {
                     onSend={handleSendFollowUp}
                     onPreview={handlePreview}
                     onCopy={handleCopy}
+                    onGmail={handleOpenGmail}
                     onMarkSent={handleMarkSent}
                     sendingId={sendingId}
                     markingId={markingId}

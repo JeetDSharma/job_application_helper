@@ -14,6 +14,8 @@ import { upsertRecipient } from "@/lib/db/recipient";
 import {
   insertEmailLog,
   updateEmailStatus,
+  updateMessageId,
+  getOriginalEmailForThread,
   markFollowUpSent,
 } from "@/lib/db/emailLog";
 const prisma = new PrismaClient();
@@ -32,6 +34,7 @@ export async function POST(req: NextRequest) {
     isFollowUp,
     customHtml,
     resumeFile = "resume.pdf",
+    originalEmailLogId,
   } = body; // Get new fields
   console.log(body);
 
@@ -60,11 +63,18 @@ export async function POST(req: NextRequest) {
     followUpDate.setDate(followUpDate.getDate() + 6);
   }
 
+  const emailSubject = isFollowUp
+    ? `Following up - ${jobPosition} at ${company}`
+    : isRecruiter
+      ? `${jobPosition} - Founding Engineer w/ 2 YOE | May 2026 Grad`
+      : `Seeking to Learn From Your Journey to ${company}`;
+
   const emailLogId = await insertEmailLog({
     recipientId,
     jobPosition,
     templateUsed,
     followUpScheduledFor: followUpDate,
+    emailSubject,
   });
 
   const transporter = nodemailer.createTransport({
@@ -138,48 +148,72 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const emailSubject = isFollowUp
-    ? `Following up - ${jobPosition} at ${company}`
-    : isRecruiter
-      ? `${jobPosition} - Founding Engineer w/ 2 YOE | May 2026 Grad`
-      : `Seeking to Learn From Your Journey to ${company}`;
+  // Threading: look up original email's messageId and subject for follow-ups
+  let threadSubject = emailSubject;
+  let inReplyTo: string | undefined;
+  let references: string | undefined;
 
-  const mailOptions = {
+  if (isFollowUp && originalEmailLogId) {
+    const originalEmail = await getOriginalEmailForThread(originalEmailLogId);
+    if (originalEmail?.messageId) {
+      inReplyTo = originalEmail.messageId;
+      references = originalEmail.messageId;
+    }
+    if (originalEmail?.emailSubject) {
+      threadSubject = `Re: ${originalEmail.emailSubject}`;
+    }
+  }
+
+  const mailOptions: Record<string, unknown> = {
     from: `"Jeet Sharma" <${process.env.SMTP_USER}>`,
     to: email,
-    subject: emailSubject,
+    subject: threadSubject,
     html: html_body,
-    attachments: [
-      {
-        filename: attachmentName,
-        content: resumeBuffer,
-        contentType: "application/pdf",
-      },
-    ],
+    ...(inReplyTo && { inReplyTo }),
+    ...(references && { references }),
+    ...(!isFollowUp && {
+      attachments: [
+        {
+          filename: attachmentName,
+          content: resumeBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    }),
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
     console.log("Sent");
     await updateEmailStatus({ emailLogId, status: "SENT" });
 
+    // Store the SMTP Message-ID for future threading
+    if (info.messageId) {
+      await updateMessageId(emailLogId, info.messageId);
+    }
+
     // If this is a follow-up, mark the original email log
     if (isFollowUp) {
-      const originalEmailLog = await prisma.emailLog.findFirst({
-        where: {
-          recipientId,
-          followUpScheduledFor: {
-            not: null,
+      if (originalEmailLogId) {
+        await markFollowUpSent(originalEmailLogId);
+      } else {
+        // Fallback: find the original email log by recipient
+        const originalEmailLog = await prisma.emailLog.findFirst({
+          where: {
+            recipientId,
+            followUpScheduledFor: {
+              not: null,
+            },
+            responseReceived: false,
           },
-          responseReceived: false,
-        },
-        orderBy: {
-          sentAt: "desc",
-        },
-      });
+          orderBy: {
+            sentAt: "desc",
+          },
+        });
 
-      if (originalEmailLog) {
-        await markFollowUpSent(originalEmailLog.id);
+        if (originalEmailLog) {
+          await markFollowUpSent(originalEmailLog.id);
+        }
       }
     }
 
