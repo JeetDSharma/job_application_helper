@@ -853,6 +853,32 @@ Jeet Sharma`;
 
             <div className="flex flex-col">
               <label
+                htmlFor="name"
+                className="text-sm font-medium text-gray-700 flex items-center gap-2"
+              >
+                <FaUser /> Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                value={emailForm.name}
+                onChange={handleChange}
+                onBlur={() => handleBlur("name")}
+                required
+                className={`border mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring ${
+                  touched.name && formErrors.name
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-indigo-500"
+                }`}
+              />
+              {touched.name && formErrors.name && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col">
+              <label
                 htmlFor="company"
                 className="text-sm font-medium text-gray-700 flex items-center gap-2"
               >
@@ -877,32 +903,6 @@ Jeet Sharma`;
                 <p className="mt-1 text-sm text-red-600">
                   {formErrors.company}
                 </p>
-              )}
-            </div>
-
-            <div className="flex flex-col">
-              <label
-                htmlFor="name"
-                className="text-sm font-medium text-gray-700 flex items-center gap-2"
-              >
-                <FaUser /> Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                value={emailForm.name}
-                onChange={handleChange}
-                onBlur={() => handleBlur("name")}
-                required
-                className={`border mt-1 px-3 py-2 rounded-md focus:outline-none focus:ring ${
-                  touched.name && formErrors.name
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-indigo-500"
-                }`}
-              />
-              {touched.name && formErrors.name && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
               )}
             </div>
 
