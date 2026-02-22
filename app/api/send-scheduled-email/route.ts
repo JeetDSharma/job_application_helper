@@ -78,6 +78,10 @@ export async function POST(req: NextRequest) {
     ];
     if (!ALLOWED_RESUMES.includes(resumeFile)) {
       await updateEmailStatus({ emailLogId, status: "FAILED" });
+      await prisma.emailLog.update({
+        where: { id: emailLogId },
+        data: { followUpScheduledFor: null },
+      });
       return NextResponse.json(
         { error: "Invalid resume file in scheduled email" },
         { status: 400 },
@@ -89,6 +93,10 @@ export async function POST(req: NextRequest) {
     // Check if file exists
     if (!fs.existsSync(resumePath)) {
       await updateEmailStatus({ emailLogId, status: "FAILED" });
+      await prisma.emailLog.update({
+        where: { id: emailLogId },
+        data: { followUpScheduledFor: null },
+      });
       return NextResponse.json(
         { error: `Resume file not found: ${resumeFile}` },
         { status: 400 },

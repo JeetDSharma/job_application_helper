@@ -243,8 +243,10 @@ function PendingFollowUpCard({
   onCopy,
   onGmail,
   onMarkSent,
+  onCancel,
   sendingId,
   markingId,
+  cancellingId,
   formatDate,
   getDaysUntil,
   urgency,
@@ -255,8 +257,10 @@ function PendingFollowUpCard({
   onCopy: (followUp: FollowUp) => void;
   onGmail: (followUp: FollowUp) => void;
   onMarkSent: (followUp: FollowUp) => void;
+  onCancel: (followUp: FollowUp) => void;
   sendingId: string | null;
   markingId: string | null;
+  cancellingId: string | null;
   formatDate: (date: string) => string;
   getDaysUntil: (date: string) => number;
   urgency: "overdue" | "today" | "normal";
@@ -362,6 +366,20 @@ function PendingFollowUpCard({
           >
             <FaEnvelope className="text-xs" />
             <span className="text-xs">Gmail</span>
+          </button>
+          <button
+            onClick={() => onCancel(followUp)}
+            disabled={cancellingId === followUp.id}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-medium transition-all ${
+              cancellingId === followUp.id
+                ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                : "border border-red-300 bg-white hover:bg-red-50 hover:border-red-400 text-red-700"
+            }`}
+          >
+            <FaTimes className="text-xs" />
+            <span className="text-xs">
+              {cancellingId === followUp.id ? "Cancelling..." : "Cancel"}
+            </span>
           </button>
           <button
             onClick={() => onMarkSent(followUp)}
@@ -615,8 +633,10 @@ function PendingFollowUpSections({
   onCopy,
   onGmail,
   onMarkSent,
+  onCancel,
   sendingId,
   markingId,
+  cancellingId,
   formatDate,
   getDaysUntil,
 }: {
@@ -626,8 +646,10 @@ function PendingFollowUpSections({
   onCopy: (followUp: FollowUp) => void;
   onGmail: (followUp: FollowUp) => void;
   onMarkSent: (followUp: FollowUp) => void;
+  onCancel: (followUp: FollowUp) => void;
   sendingId: string | null;
   markingId: string | null;
+  cancellingId: string | null;
   formatDate: (date: string) => string;
   getDaysUntil: (date: string) => number;
 }) {
@@ -656,8 +678,10 @@ function PendingFollowUpSections({
                 onCopy={onCopy}
                 onGmail={onGmail}
                 onMarkSent={onMarkSent}
+                onCancel={onCancel}
                 sendingId={sendingId}
                 markingId={markingId}
+                cancellingId={cancellingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
                 urgency="overdue"
@@ -690,8 +714,10 @@ function PendingFollowUpSections({
                 onCopy={onCopy}
                 onGmail={onGmail}
                 onMarkSent={onMarkSent}
+                onCancel={onCancel}
                 sendingId={sendingId}
                 markingId={markingId}
+                cancellingId={cancellingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
                 urgency="today"
@@ -724,8 +750,10 @@ function PendingFollowUpSections({
                 onCopy={onCopy}
                 onGmail={onGmail}
                 onMarkSent={onMarkSent}
+                onCancel={onCancel}
                 sendingId={sendingId}
                 markingId={markingId}
+                cancellingId={cancellingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
                 urgency="normal"
@@ -758,8 +786,10 @@ function PendingFollowUpSections({
                 onCopy={onCopy}
                 onGmail={onGmail}
                 onMarkSent={onMarkSent}
+                onCancel={onCancel}
                 sendingId={sendingId}
                 markingId={markingId}
+                cancellingId={cancellingId}
                 formatDate={formatDate}
                 getDaysUntil={getDaysUntil}
                 urgency="normal"
@@ -956,6 +986,9 @@ export default function FollowUps() {
     null,
   );
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [cancellingFollowUpId, setCancellingFollowUpId] = useState<
+    string | null
+  >(null);
   const [isSendingAll, setIsSendingAll] = useState(false);
   const [sendAllProgress, setSendAllProgress] = useState({
     sent: 0,
@@ -1224,6 +1257,34 @@ export default function FollowUps() {
       toast.error("Failed to mark follow-up as sent");
     } finally {
       setMarkingId(null);
+    }
+  };
+
+  const handleCancelFollowUp = async (followUp: FollowUp) => {
+    setCancellingFollowUpId(followUp.id);
+    try {
+      const response = await fetch("/api/update-email-log", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailLogId: followUp.id,
+          followUpScheduled: null,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Follow-up cancelled");
+        setPendingFollowUps(
+          pendingFollowUps.filter((f) => f.id !== followUp.id),
+        );
+      } else {
+        toast.error("Failed to cancel follow-up");
+      }
+    } catch (error) {
+      console.error("Error cancelling follow-up:", error);
+      toast.error("Failed to cancel follow-up");
+    } finally {
+      setCancellingFollowUpId(null);
     }
   };
 
@@ -1532,8 +1593,10 @@ export default function FollowUps() {
                     onCopy={handleCopy}
                     onGmail={handleOpenGmail}
                     onMarkSent={handleMarkSent}
+                    onCancel={handleCancelFollowUp}
                     sendingId={sendingId}
                     markingId={markingId}
+                    cancellingId={cancellingFollowUpId}
                     formatDate={formatDate}
                     getDaysUntil={getDaysUntil}
                   />

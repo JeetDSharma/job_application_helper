@@ -51,7 +51,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (followUpScheduled !== undefined) {
-      updateData.followUpScheduled = followUpScheduled
+      updateData.followUpScheduledFor = followUpScheduled
         ? new Date(followUpScheduled)
         : null;
     }

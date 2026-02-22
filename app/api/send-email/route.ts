@@ -224,6 +224,11 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error(err);
     await updateEmailStatus({ emailLogId, status: "FAILED" });
+    // Clear follow-up schedule for failed emails
+    await prisma.emailLog.update({
+      where: { id: emailLogId },
+      data: { followUpScheduledFor: null },
+    });
     return NextResponse.json(
       { error: "Failed to send email" },
       { status: 500 },
